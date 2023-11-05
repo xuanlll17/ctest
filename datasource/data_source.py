@@ -6,14 +6,14 @@ import csv
 sales_url = "https://bas.nccc.com.tw/nccc-nop/OpenAPI/A02/SalesVolumeand"   
 response_sale = requests.request("GET",sales_url) 	
 with open('sales.csv', 'wb') as file:
-	file.write(response_sale.content)
+	file.write(response_sale.text)
 	file.close()
 
 #本中心會員機構發卡量資料(V)
 cards = "https://bas.nccc.com.tw/nccc-nop/OpenAPI/A03/StatisticCardsCirculation"   
 response_cards = requests.request("GET",cards)
 with open('cards.csv', 'wb') as file:
-	file.write(response_cards.content)
+	file.write(response_cards.text)
 	file.close()
 
 #本中心簽帳端末機裝機臺數資料(V)
@@ -29,14 +29,14 @@ with open("pos.csv", "w", newline= '', encoding="utf-8") as file:
 Merchant_type = "https://bas.nccc.com.tw/nccc-nop/OpenAPI/A06/MerchantCategoriesPercentage"   
 response_Merchant_type= requests.request("GET",Merchant_type)
 with open('Merchant_type.csv', 'wb') as file:
-	file.write(response_Merchant_type.content)
+	file.write(response_Merchant_type.text)
 	file.close()
 
 #本中心收單特約商店數資料(V)
 Merchants = "https://bas.nccc.com.tw/nccc-nop/OpenAPI/A09/NumberNCCCAcquiredMerchants"   
 response_Merchants = requests.request("GET",Merchants)
 with open('Merchants.csv', 'wb') as file:
-	file.write(response_Merchants.content)
+	file.write(response_Merchants.text)
 	file.close()
 
 
@@ -44,7 +44,7 @@ with open('Merchants.csv', 'wb') as file:
 Merchant_area = "https://bas.nccc.com.tw/nccc-nop/OpenAPI/A10/NetworkNCCCServiceEstablishments"   
 response_Merchant_area = requests.request("GET",Merchant_area)
 with open('Merchant_area.csv', 'wb') as file:
-	file.write(response_Merchant_area.content)
+	file.write(response_Merchant_area.text)
 	file.close()
 
 
@@ -61,7 +61,7 @@ for A in area :
     if len(response_area.text) == 0:
         continue
     with open(f'area_{A}.csv', 'wb') as file:
-        file.write(response_area.content)
+        file.write(response_area.text)
         file.close()
 
 
@@ -77,7 +77,7 @@ for B in industry :
     if len(response_industry.text) == 0:
         continue
     with open(f'industry_{B}.csv', 'wb') as file:
-        file.write(response_industry.content)
+        file.write(response_industry.text)
         file.close()
 
 #兩性消費
@@ -87,18 +87,18 @@ for C in industry :
     if len(response_sexSum.text) == 0:
         continue
     with open(f'sexSum_{C}.csv', 'wb') as file:
-        file.write(response_sexSum.content)
+        file.write(response_sexSum.text)
 
 #各職業類別消費樣態資料(V)
 jobSum_url = f"https://bas.nccc.com.tw/nccc-nop/OpenAPI/C04/jobsconsumption/TWN/ALL"   
 response_jobSum = requests.request("GET",jobSum_url)
 with open(f'jobSum.csv', 'wb') as file:
-	file.write(response_jobSum.content)
+	file.write(response_jobSum.text)
 	file.close()
 
 #各年收入族群消費樣態資料(V)
 incomSum_url = f"https://bas.nccc.com.tw/nccc-nop/OpenAPI/C03/incomegroupsconsumption/TWN/ALL"   
 response_incomSum = requests.request("GET",incomSum_url)
 with open(f'incomSum.csv', 'wb') as file:
-	file.write(response_incomSum.content)
+	file.write(response_incomSum.text)
 	file.close()
