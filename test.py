@@ -10,7 +10,7 @@ def __download_credit_data() -> csv:
     area = ['KLC', 'TPE', 'NTP', 'TYC', 'HCC', 'HCH', 'MLH', 'TCC', 'CHH', 'NTH', 'YUH', 'CYC', 'CYH', 'TNC', 'KHC',' PTH', 'TTH', 'HLH', 'YIH', 'PHH', 'KMH', 'LCH', 'X1',' LCSUM', 'MCT', 'LOC']
 
     industry = ['FD', 'CT', 'LG', 'TR', 'EE', 'DP', 'X2', 'OT', ' IDSUM', 'ALL']
-    DataType = ['sex', 'job', 'incom', 'eduction']
+    DataType = ['sex', 'job', 'incom', 'education']
 
     # 兩性消費
     for A in industry:
@@ -60,22 +60,20 @@ def __download_credit_data() -> csv:
                 file.close()
     print('教育程度資料讀取成功')
 
-
-#---------合併csv---------#
-def merge_csv(path, output):
-    csv_files = [file for file in os.listdir(path) if file.endswith('.csv')]
-    merged_data = pd.DataFrame()
-    for file in csv_files:
-        file_path = os.path.join(path, file)
-        data = pd.read_csv(file_path)
-        merged_data = pd.concat([merged_data, data], ignore_index=True)
-    merged_data.to_csv(output, index=False)
+    #---------合併csv---------#
+    for D in DataType:
+        path = f'./datasource/{D}/'
+        csv_files = [file for file in os.listdir(path) if file.endswith('.csv')]
+        merged_data = pd.DataFrame()
+        for file in csv_files:
+            file_path = os.path.join(path, file)
+            data = pd.read_csv(file_path)
+            merged_data = pd.concat([merged_data, data], ignore_index=True)
+        merged_data.to_csv(f'{D}.csv', index=False)
 
 
 #---------建立資料庫---------#
 def __create_table(conn:sqlite3.Connection): 
-    conn = sqlite3.connect('creditcard.db')
-
     cursor = conn.cursor()
     cursor.execute(
         '''
@@ -138,16 +136,10 @@ def __create_table(conn:sqlite3.Connection):
     )
 
     conn.commit()
-    conn.close()
 
 
 #---------輸入資料---------#
-def __insert_data(conn:sqlite3.Connection,values:())->None:
-    cursor = conn.cursor()
-
-    def csv_to_database(csv_file, table_name):
-        df = pd.read_csv(csv_file)
-        df.to_sql(table_name, conn, if_exists="replace", index=False)
+def csv_to_database(conn:sqlite3.Connection)->None:
 
     csv_files = [
         {"file": "education.csv", "table": "教育程度類別消費資料"},
@@ -159,7 +151,8 @@ def __insert_data(conn:sqlite3.Connection,values:())->None:
     for file_info in csv_files:
         csv_file = file_info["file"]
         table_name = file_info["table"]
-        csv_to_database(csv_file=csv_file, table_name=table_name)
+        df = pd.read_csv(csv_file)
+        df.to_sql(table_name, conn, if_exists="replace", index=False)
 
     conn.commit()
     conn.close()
@@ -167,19 +160,9 @@ def __insert_data(conn:sqlite3.Connection,values:())->None:
 
 def main()->None:
     __download_credit_data()
-    csv_files = [
-    {'path':'./datasource/sex/', 'file':'sex.csv'},
-    {'path':'./datasource/job/', 'file': 'job.csv'},
-    {'path':'./datasource/incom/','file':'incom.csv'},
-    {'path':'./datasource/education/','file':'education.csv'}
-    ]
-    for file in csv_files:
-        path = file['path']
-        output = file['file']
-        merge_csv(path=path, output=output)
-        
-    conn = sqlite3.connect("兩性類別消費資料.db")
+    conn = sqlite3.connect("test.db")
     __create_table(conn) 
+    csv_to_database(conn)
 
 if __name__ == '__main__':
     main()
