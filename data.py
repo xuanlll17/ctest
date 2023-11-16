@@ -7,8 +7,7 @@ import pandas as pd
 
 # ---------下載資料---------#
 def __download_credit_data() -> csv:
-    area = ['KLC', 'TPE', 'NTP', 'TYC', 'HCC', 'HCH', 'MLH', 'TCC', 'CHH', 'NTH', 'YUH', 'CYC', 'CYH', 'TNC', 'KHC',' PTH', 'TTH', 'HLH', 'YIH', 'PHH', 'KMH', 'LCH', 'X1',' LCSUM', 'MCT', 'LOC']
-
+    area = ["KLC","TPE","NTP","TYC","HCC","HCH","MLH","TCC","CHH","NTH","YUH","CYC","CYH","TNC","KHC","PTH","TTH","HLH","YIH","PHH","KMH","LCH","X1","LCSUM","MCT","LOC"]
     industry = ["FD", "CT", "LG", "TR", "EE", "DP", "X2", "OT", " IDSUM", "ALL"]
     DataType = ["sex", "job", "incom", "education", "age"]
     sex = ["M", "F"]
@@ -89,90 +88,21 @@ def __download_credit_data() -> csv:
         for file in csv_files:
             file_path = os.path.join(path, file)
             data = pd.read_csv(file_path)
+
+            data["年月"] = data["年月"].astype(str)
+
+            data["年"] = data["年月"].str[:4]
+            data["月"] = data["年月"].str[4:]
+
+            columns = ["年", "月"] + [
+                col for col in data.columns if col not in ["年", "月", "年月"]
+            ]
+            data = data[columns]
+
             merged_data = pd.concat([merged_data, data], ignore_index=True)
         merged_data.to_csv(f"{D}.csv", index=False)
+        print(f"{D}.csv建立成功")
 
-
-# ---------建立資料庫---------#
-def __create_table(conn: sqlite3.Connection):
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        CREATE TABLE  IF NOT EXISTS education(
-                "id"	INTEGER,
-                "年月"	TEXT NOT NULL,
-                "地區"	TEXT NOT NULL,
-                "產業別"	TEXT NOT NULL,
-                "教育程度類別"	TEXT NOT NULL,
-                "信用卡交易筆數"	INTEGER NOT NULL,
-                "信用卡交易金額"	INTEGER NOT NULL,            
-                PRIMARY KEY("id" AUTOINCREMENT)
-        );
-        """
-    )
-
-    cursor.execute(
-        """
-        CREATE TABLE  IF NOT EXISTS incom(
-            "id"	INTEGER,
-            "年月"	TEXT NOT NULL,
-            "地區"	TEXT NOT NULL,
-            "產業別"	TEXT NOT NULL,
-            "年收入"	TEXT NOT NULL,
-            "信用卡交易筆數"	INTEGER NOT NULL,
-            "信用卡交易金額"	INTEGER NOT NULL,            
-            PRIMARY KEY("id" AUTOINCREMENT)
-        );
-        """
-    )
-
-    cursor.execute(
-        """
-        CREATE TABLE  IF NOT EXISTS sex(
-            "id"	INTEGER,
-            "年月"	TEXT NOT NULL,
-            "地區"	TEXT NOT NULL,
-            "產業別"	TEXT NOT NULL,
-            "性別"	INTEGER NOT NULL,
-            "信用卡交易筆數"	INTEGER NOT NULL,
-            "信用卡交易金額"	INTEGER NOT NULL,            
-            PRIMARY KEY("id" AUTOINCREMENT)
-        );
-        """
-    )
-
-    cursor.execute(
-        """
-            CREATE TABLE  IF NOT EXISTS job(
-                "id"	INTEGER,
-                "年月"	TEXT NOT NULL,
-                "地區"	TEXT NOT NULL,
-                "產業別"	TEXT NOT NULL,
-                "職業類別"	TEXT NOT NULL,
-                "信用卡交易筆數"	INTEGER NOT NULL,
-                "信用卡交易金額"	INTEGER NOT NULL,            
-                PRIMARY KEY("id" AUTOINCREMENT)
-            );
-        """
-    )
-
-    cursor.execute(
-        """
-            CREATE TABLE  IF NOT EXISTS age(
-                "id"	INTEGER,
-                "年月"	TEXT NOT NULL,
-                "地區"	TEXT NOT NULL,
-                "產業別"	TEXT NOT NULL,
-                "性別"	TEXT NOT NULL,
-                "年齡層"	TEXT NOT NULL,
-                "信用卡交易筆數"	INTEGER NOT NULL,
-                "信用卡交易金額"	INTEGER NOT NULL,            
-                PRIMARY KEY("id" AUTOINCREMENT)
-            );
-        """
-    )
-
-    conn.commit()
 
 
 # ---------輸入資料---------#
@@ -190,7 +120,7 @@ def csv_to_database(conn: sqlite3.Connection) -> None:
 def main() -> None:
     __download_credit_data()
     conn = sqlite3.connect("creditcard.db")
-    __create_table(conn)
+
     csv_to_database(conn)
 
 

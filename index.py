@@ -4,7 +4,7 @@ from tkinter import messagebox
 import data
 import pandas as pd
 from treeview import TreeView
-from concurrent.futures import ThreadPoolExecutor
+
 
 class Window(tk.Tk):
     def __init__(self, **kwargs):
@@ -24,13 +24,17 @@ class Window(tk.Tk):
 
         #------資料呈現------#
         middleFrame = ttk.Labelframe(self, text="資料")
-        self.treeview = TreeView(middleFrame,show = 'headings', height = 20)
+        self.treeview = TreeView(middleFrame, show='headings', height=20)
         self.treeview.grid(row=1, column=0, padx=10, pady=10)
-        middleFrame.pack() 
-        
-        scrollBar = ttk.Scrollbar(middleFrame,orient='vertical',command=self.treeview.yview)
-        scrollBar.pack(side='right',fill='y')
+
+        # 垂直滾動條
+        scrollBar = ttk.Scrollbar(middleFrame, orient='vertical', command=self.treeview.yview)
+        scrollBar.grid(row=1, column=1, sticky='ns')  # 使用 grid 進行佈局管理
+
         self.treeview.configure(yscrollcommand=scrollBar.set)
+
+        middleFrame.pack()
+
        
 
         #------分析------#
@@ -63,29 +67,18 @@ class Window(tk.Tk):
         self.display_data(data)
 
     def display_data(self, data):
-    # 如果數據集不為空
+        self.treeview.delete(*self.treeview.get_children())  # 清空 Treeview
+
         if not data.empty:
-            # 如果前三列的欄位還沒有設定，則設定欄位
-            if not hasattr(self, "_columns_set"):
-                columns = list(data.columns)[:3]  # 僅取前三列的欄位
-                self.treeview["columns"] = columns
-                for col in columns:
-                    self.treeview.heading(col, text=col, anchor=tk.W)
-                    self.treeview.column(col, anchor=tk.W, width=100)
+            columns = list(data.columns)
+            self.treeview["columns"] = columns
+            for col in columns:
+                self.treeview.heading(col, text=col, anchor='w')
+                self.treeview.column(col, anchor='w', width=100)  # 設定欄位寬度，可以自行調整
 
-                # 設定 _columns_set，表示前三列的欄位已經設定過
-                self._columns_set = True
-
-            # 遍歷數據集，僅取後三列的值，並插入 Treeview
             for index, row in data.iterrows():
-                # 取得前三列的值
-                values = [row[col] for col in list(data.columns)[:3]]
-                item_id = self.treeview.insert("", "end", values=values)
-
-                # 繼續遍歷後三列的值，插入至對應的 item_id 底下
-                for col in list(data.columns)[3:]:
-                    value = row[col]
-                    self.treeview.set(item_id, col, value)
+                values = [row[col] for col in columns]
+                self.treeview.insert("", "end", values=values)
 
         
 
