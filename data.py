@@ -105,7 +105,7 @@ def __create_table(conn: sqlite3.Connection):
                 "產業別"	TEXT NOT NULL,
                 "教育程度類別"	TEXT NOT NULL,
                 "信用卡交易筆數"	INTEGER NOT NULL,
-                "信用卡交易金額[新台幣]"	INTEGER NOT NULL,            
+                "信用卡交易金額"	INTEGER NOT NULL,            
                 PRIMARY KEY("id" AUTOINCREMENT)
         );
         """
@@ -120,7 +120,7 @@ def __create_table(conn: sqlite3.Connection):
             "產業別"	TEXT NOT NULL,
             "年收入"	TEXT NOT NULL,
             "信用卡交易筆數"	INTEGER NOT NULL,
-            "信用卡交易金額[新台幣]"	INTEGER NOT NULL,            
+            "信用卡交易金額"	INTEGER NOT NULL,            
             PRIMARY KEY("id" AUTOINCREMENT)
         );
         """
@@ -135,7 +135,7 @@ def __create_table(conn: sqlite3.Connection):
             "產業別"	TEXT NOT NULL,
             "性別"	INTEGER NOT NULL,
             "信用卡交易筆數"	INTEGER NOT NULL,
-            "信用卡交易金額[新台幣]"	INTEGER NOT NULL,            
+            "信用卡交易金額"	INTEGER NOT NULL,            
             PRIMARY KEY("id" AUTOINCREMENT)
         );
         """
@@ -150,7 +150,7 @@ def __create_table(conn: sqlite3.Connection):
                 "產業別"	TEXT NOT NULL,
                 "職業類別"	TEXT NOT NULL,
                 "信用卡交易筆數"	INTEGER NOT NULL,
-                "信用卡交易金額[新台幣]"	INTEGER NOT NULL,            
+                "信用卡交易金額"	INTEGER NOT NULL,            
                 PRIMARY KEY("id" AUTOINCREMENT)
             );
         """
@@ -166,7 +166,7 @@ def __create_table(conn: sqlite3.Connection):
                 "性別"	TEXT NOT NULL,
                 "年齡層"	TEXT NOT NULL,
                 "信用卡交易筆數"	INTEGER NOT NULL,
-                "信用卡交易金額[新台幣]"	INTEGER NOT NULL,            
+                "信用卡交易金額"	INTEGER NOT NULL,            
                 PRIMARY KEY("id" AUTOINCREMENT)
             );
         """
@@ -189,7 +189,7 @@ def csv_to_database(conn: sqlite3.Connection) -> None:
 
 def main() -> None:
     __download_credit_data()
-    conn = sqlite3.connect("test.db")
+    conn = sqlite3.connect("creditcard.db")
     __create_table(conn)
     csv_to_database(conn)
 
