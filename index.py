@@ -17,15 +17,15 @@ class Window(tk.Tk):
         tk.Label(middleFrame, text="").pack()
         middleFrame.pack()
 
-        bottomFrame1 = ttk.Labelframe(self, text="副圖1")
+        bottomFrame1 = ttk.Labelframe(self, text="圖1")
         tk.Label(bottomFrame1, text="").pack()
         bottomFrame1.pack()
 
-        bottomFrame2 = ttk.Labelframe(self, text="副圖2")
+        bottomFrame2 = ttk.Labelframe(self, text="圖2")
         tk.Label(bottomFrame2, text="").pack()
         bottomFrame2.pack()
 
-        bottomFrame3 = ttk.Labelframe(self, text="副圖3")
+        bottomFrame3 = ttk.Labelframe(self, text="圖3")
         tk.Label(bottomFrame3, text="").pack()
         bottomFrame3.pack()
 
