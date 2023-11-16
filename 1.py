@@ -2,20 +2,20 @@ import tkinter as tk
 from tkinter import ttk
 import pandas as pd
 
-class CSVViewerApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("CSV Viewer")
+class Window(tk.Tk):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.title("信用卡消費樣態")
 
         # 下拉選單
         self.dropdown_var = tk.StringVar()
         self.dropdown_var.set("Select Data")
-        self.dropdown = ttk.Combobox(root, textvariable=self.dropdown_var, values=["Job", "Incom", "Education"])
+        self.dropdown = ttk.Combobox(self, textvariable=self.dropdown_var, values=["Job", "Incom", "Education"])
         self.dropdown.grid(row=0, column=0, padx=10, pady=10)
         self.dropdown.bind("<<ComboboxSelected>>", self.load_data)
 
-        # 文本框
-        self.textbox = tk.Text(root, height=20, width=50)
+        
+        self.textbox = tk.Text(self, height=20, width=50)
         self.textbox.grid(row=1, column=0, padx=10, pady=10)
 
     def load_data(self, event):
@@ -39,9 +39,8 @@ class CSVViewerApp:
             self.textbox.insert(tk.END, data)
 
 def main():
-    root = tk.Tk()
-    app = CSVViewerApp(root)
-    root.mainloop()
+    window = Window()
+    window.mainloop()
 
 if __name__ == "__main__":
     main()
