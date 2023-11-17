@@ -14,18 +14,21 @@ class Window(tk.Tk):
         # -----interface-----#
         #------搜尋------#
         topFrame = ttk.Labelframe(self, text="搜尋")
+        topFrame.pack()
+
+        tk.Label(topFrame, text="資料類別").grid(row=0, column=0)
         self.data_var = tk.StringVar()
-        self.data_var.set("資料類別")
+        self.data_var.set("Select Data")
         self.data = ttk.Combobox(topFrame, textvariable=self.data_var, values=["Job", "Incom", "Education", "Sex", "Age"])
-        self.data.grid(row=0, column=0, padx=10, pady=10)
+        self.data.grid(row=0, column=1, padx=10, pady=10)
         self.data.bind("<<ComboboxSelected>>", self.load_data)
 
         self.year_var = tk.StringVar()
-        self.year_var.set("年分")
+        self.year_var.set("Select Year")
         self.year = ttk.Combobox(topFrame, textvariable = self.year_var, values = ['2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023'])
         self.year.grid(row=0, column=1, padx=10, pady=10)
 
-        topFrame.pack()
+        
 
         #------資料呈現------#
         middleFrame = ttk.Labelframe(self, text="資料")
