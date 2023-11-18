@@ -14,6 +14,7 @@ class Window(tk.Tk):
         # -----interface-----#
         #------搜尋------#
         topFrame = ttk.Labelframe(self, text="搜尋")
+<<<<<<< HEAD
         self.dataLabel = ttk.Label(topFrame, text="資料類別:").grid(row=0, column=0, padx=10, pady=10)
         self.choose_var = tk.StringVar()
         self.choose_var.set("Select Data")
@@ -21,7 +22,23 @@ class Window(tk.Tk):
         self.choose.grid(row=0, column=1, padx=10, pady=10)
         self.choose.bind("<<ComboboxSelected>>", self.load_data)
 
+=======
+>>>>>>> d7f0193b775d4c319f41580f952c3ba60df94df3
         topFrame.pack()
+
+        tk.Label(topFrame, text="資料類別").grid(row=0, column=0)
+        self.data_var = tk.StringVar()
+        self.data_var.set("Select Data")
+        self.data = ttk.Combobox(topFrame, textvariable=self.data_var, values=["Job", "Incom", "Education", "Sex", "Age"])
+        self.data.grid(row=0, column=1, padx=10, pady=10)
+        self.data.bind("<<ComboboxSelected>>", self.load_data)
+
+        self.year_var = tk.StringVar()
+        self.year_var.set("Select Year")
+        self.year = ttk.Combobox(topFrame, textvariable = self.year_var, values = ['2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023'])
+        self.year.grid(row=0, column=1, padx=10, pady=10)
+
+        
 
         #------資料呈現------#
         middleFrame = ttk.Labelframe(self, text="資料")
@@ -52,7 +69,7 @@ class Window(tk.Tk):
         bottomFrame3.pack()
         
     def load_data(self, event):
-        selected_option = self.choose_var.get()
+        selected_option = self.data_var.get()
 
         if selected_option == "Job":
             data = pd.read_csv("job.csv")
@@ -64,6 +81,14 @@ class Window(tk.Tk):
             data = pd.read_csv("sex.csv")
         elif selected_option == "Age":
             data = pd.read_csv("age.csv")
+
+            years = data['年'].unique()
+            self.year['values'] = ['Select Year'] + list(map(int, years))
+            select.year_var.set("Select Year")
+
+        selected_year = self.year_var.get()
+        if selected_year != "Select Year":
+            data = data[data['年'] == int(selected_year)] 
 
         self.display_data(data)
 
