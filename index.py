@@ -14,10 +14,11 @@ class Window(tk.Tk):
         # -----interface-----#
         #------搜尋------#
         topFrame = ttk.Labelframe(self, text="搜尋")
+        self.dataLabel = ttk.Label(topFrame, text="資料類別:").grid(row=0, column=0, padx=10, pady=10)
         self.choose_var = tk.StringVar()
         self.choose_var.set("Select Data")
         self.choose = ttk.Combobox(topFrame, textvariable=self.choose_var, values=["Job", "Incom", "Education", "Sex", "Age"])
-        self.choose.grid(row=0, column=0, padx=10, pady=10)
+        self.choose.grid(row=0, column=1, padx=10, pady=10)
         self.choose.bind("<<ComboboxSelected>>", self.load_data)
 
         topFrame.pack()
