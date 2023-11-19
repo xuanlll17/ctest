@@ -7,7 +7,58 @@ import pandas as pd
 
 # ---------下載資料---------#
 def __download_credit_data() -> csv:
-    area = ["KLC","TPE","NTP","TYC","HCC","HCH","MLH","TCC","CHH","NTH","YUH","CYC","CYH","TNC","KHC","PTH","TTH","HLH","YIH","PHH","KMH","LCH","X1","LCSUM","MCT","LOC"]
+    area = [
+        "KLC",
+        "TPE",
+        "NTP",
+        "TYC",
+        "HCC",
+        "HCH",
+        "MLH",
+        "TCC",
+        "CHH",
+        "NTH",
+        "YUH",
+        "CYC",
+        "CYH",
+        "TNC",
+        "KHC",
+        "PTH",
+        "TTH",
+        "HLH",
+        "YIH",
+        "PHH",
+        "KMH",
+        "LCH",
+        "X1",
+        "LCSUM",
+        "MCT",
+        "LOC",
+    ]
+    area_code = {
+        "63000000": "臺北市",
+        "64000000": "高雄市",
+        "65000000": "新北市",
+        "66000000": "臺中市",
+        "67000000": "臺南市",
+        "68000000": "桃園市",
+        "10002000": "宜蘭縣",
+        "10004000": "新竹縣",
+        "10005000": "苗栗縣",
+        "10007000": "彰化縣",
+        "10008000": "南投縣",
+        "10009000": "雲林縣",
+        "10010000": "嘉義縣",
+        "10020000": "嘉義市",
+        "10013000": "屏東縣",
+        "10014000": "臺東縣",
+        "10015000": "花蓮縣",
+        "10016000": "澎湖縣",
+        "10017000": "基隆市",
+        "10018000": "新竹市",
+        "09020000": "金門縣",
+        "09007000": "連江縣",
+    }
     industry = ["FD", "CT", "LG", "TR", "EE", "DP", "X2", "OT", " IDSUM", "ALL"]
     DataType = ["sex", "job", "incom", "education", "age"]
     sex = ["M", "F"]
@@ -21,7 +72,7 @@ def __download_credit_data() -> csv:
             response_sex = requests.request("GET", sex_url)
             if len(response_sex.text) == 0:
                 continue
-            with open(f"./datasource/sex/job{B}_{A}.csv", "wb") as file:
+            with open(f"./datasource/sex/sex{B}_{A}.csv", "wb") as file:
                 file.write(response_sex.content)
                 file.close()
     print("性別消費資料讀取成功")
@@ -81,46 +132,58 @@ def __download_credit_data() -> csv:
     print("年齡層消費資料讀取成功")
 
     # ---------合併csv---------#
-    for D in DataType:
-        path = f"./datasource/{D}/"
+    for item in DataType:
+        path = f"./datasource/{item}/"
         csv_files = [file for file in os.listdir(path) if file.endswith(".csv")]
         merged_data = pd.DataFrame()
         for file in csv_files:
             file_path = os.path.join(path, file)
             data = pd.read_csv(file_path)
-
-            data["年月"] = data["年月"].astype(str)
-
-            data["年"] = data["年月"].str[:4]
-            data["月"] = data["年月"].str[4:]
-
-            columns = ["年", "月"] + [
-                col for col in data.columns if col not in ["年", "月", "年月"]
-            ]
-            data = data[columns]
-
             merged_data = pd.concat([merged_data, data], ignore_index=True)
-        merged_data.to_csv(f"{D}.csv", index=False)
-        print(f"{D}.csv建立成功")
+        merged_data.to_csv(f"{item}.csv", index=False)
+        print(f"{item}.csv建立成功")
 
+        with open(f"./{item}.csv", "r", encoding="UTF-8") as csv_file:
+            csv_reader = csv.DictReader(csv_file)
+            fieldnames = csv_reader.fieldnames
+
+            with open(f"./{item}_trans.csv", "w", encoding="utf-8", newline="") as file:
+                new_fieldnames = ["年", "月"] + fieldnames[1:]
+                csv_writer = csv.DictWriter(file, fieldnames=new_fieldnames)
+                csv_writer.writeheader()
+
+                for row in csv_reader:
+                    # 使用get方法，如果找不到對應的鍵，就保持原來的值
+                    row["地區"] = area_code.get(row["地區"], row["地區"])
+                    year = row["年月"][:4]
+                    month = row["年月"][4:]
+                    new_row = {"年": year, "月": month, "地區": row["地區"]}
+                    new_row.update(row)
+                    del new_row["年月"]
+                    csv_writer.writerow(new_row)
+
+                print(f"{item}_trans.csv建立成功")
+
+    
 
 
 # ---------輸入資料---------#
 def csv_to_database(conn: sqlite3.Connection) -> None:
     DataType = ["sex", "job", "incom", "education", "age"]
     for item in DataType:
-        file = f"./{item}.csv"
+        file = f"./{item}_trans.csv"
         df = pd.read_csv(file)
-        df.to_sql(item, conn, if_exists="replace", index=False)
+        
+        df.rename(columns={'信用卡交易金額[新台幣]':'信用卡金額'}, inplace=True)
+        df.to_sql(item, conn, if_exists="append", index=False)
 
-    conn.commit()
+    
     conn.close()
 
 
 def main() -> None:
     __download_credit_data()
     conn = sqlite3.connect("creditcard.db")
-
     csv_to_database(conn)
 
 

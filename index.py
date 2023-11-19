@@ -3,7 +3,6 @@ from tkinter import ttk
 from tkinter import messagebox
 import data
 import pandas as pd
-from treeview import TreeView
 
 
 class Window(tk.Tk):
@@ -32,7 +31,7 @@ class Window(tk.Tk):
 
         #------資料呈現------#
         middleFrame = ttk.Labelframe(self, text="資料")
-        self.treeview = TreeView(middleFrame, show='headings', height=20)
+        self.treeview = ttk.Treeview(middleFrame, show='headings', height=20)
         self.treeview.grid(row=1, column=0, padx=10, pady=10)
 
         # 垂直滾動條
