@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 import pandas as pd
 import sqlite3
-import csv
 
 
 class Window(tk.Tk):
@@ -24,8 +23,11 @@ class Window(tk.Tk):
         self.monthLabel = ttk.Label(topFrame, text="月份:").grid(
             row=0, column=4, padx=10, pady=10
         )
-        self.industryLabel = ttk.Label(topFrame, text="產業別:").grid(
+        self.areaLabel = ttk.Label(topFrame, text="地區:").grid(
             row=0, column=6, padx=10, pady=10
+        )
+        self.industryLabel = ttk.Label(topFrame, text="產業別:").grid(
+            row=0, column=8, padx=10, pady=10
         )
         # ------StringVar------#
         self.data_var = tk.StringVar()
@@ -82,6 +84,39 @@ class Window(tk.Tk):
         self.month.grid(row=0, column=5, padx=10, pady=10)
         self.month.bind("<<ComboboxSelected>>", self.load_month)
 
+        self.area_var = tk.StringVar()
+        self.area_var.set("Select Area")
+        self.area = ttk.Combobox(
+            topFrame,
+            textvariable=self.area_var,
+            values=[
+                "臺北市",
+                "高雄市",
+                "新北市",
+                "臺中市",
+                "臺南市",
+                "桃園市",
+                "宜蘭縣",
+                "新竹縣",
+                "苗栗縣",
+                "彰化縣",
+                "南投縣",
+                "雲林縣",
+                "嘉義縣",
+                "嘉義市",
+                "屏東縣",
+                "臺東縣",
+                "花蓮縣",
+                "澎湖縣",
+                "基隆市",
+                "新竹市",
+                "金門縣",
+                "連江縣",
+            ],
+        )
+        self.area.grid(row=0, column=7, padx=10, pady=10)
+        self.area.bind("<<ComboboxSelected>>", self.load_area)
+
         self.industry_var = tk.StringVar()
         self.industry_var.set("Select Industry")
         self.industry = ttk.Combobox(
@@ -89,10 +124,8 @@ class Window(tk.Tk):
             textvariable=self.industry_var,
             values=["食", "衣", "住", "行", "文教康樂", "百貨", "其他"],
         )
-        self.industry.grid(row=0, column=7, padx=10, pady=10)
+        self.industry.grid(row=0, column=9, padx=10, pady=10)
         self.industry.bind("<<ComboboxSelected>>", self.load_industry)
-
-
 
         topFrame.pack()
         # ------------資料呈現------------#
@@ -134,8 +167,13 @@ class Window(tk.Tk):
         self.load_treeview()
 
     def load_month(self, event):
-        selected_month = self.year_var.get()
+        selected_month = self.month_var.get()
         print(f"Month:{selected_month}")
+        self.load_treeview()
+
+    def load_area(self, event):
+        selected_area = self.area_var.get()
+        print(f"Area:{selected_area}")
         self.load_treeview()
 
     def load_industry(self, event):
@@ -147,16 +185,20 @@ class Window(tk.Tk):
         selected_option = self.data_var.get()
         selected_year = self.year_var.get()
         selected_month = self.month_var.get()
+        selected_area = self.area_var.get()
         selected_industry = self.industry_var.get()
 
         if selected_option and selected_year:
-            sql = f"SELECT * FROM {selected_option} WHERE 年 = {selected_year}"
+            sql = f"SELECT * FROM {selected_option} WHERE 年 = '{selected_year}'"
 
             if selected_month and selected_month != "Select Month":
-                sql += f" AND 月 = {selected_month}"
+                sql += f" AND 月 = '{selected_month}'"
+
+            if selected_area and selected_area != "Select Area":
+                sql += f" AND 地區 = '{selected_area}'"
 
             if selected_industry and selected_industry != "Select Industry":
-                sql += f' AND 產業別 = "{selected_industry}"'
+                sql += f" AND 產業別 = '{selected_industry}'"
 
             data = pd.read_sql_query(sql, self.conn)
             self.display_data(data)
@@ -174,6 +216,8 @@ class Window(tk.Tk):
             for index, row in data.iterrows():
                 values = [row[col] for col in columns]
                 self.treeview.insert("", "end", values=values)
+
+    
 
 
 def main():
