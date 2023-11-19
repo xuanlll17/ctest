@@ -145,9 +145,12 @@ def __download_credit_data() -> csv:
 
         with open(f"./{item}.csv", "r", encoding="UTF-8") as csv_file:
             csv_reader = csv.DictReader(csv_file)
-            fieldnames = csv_reader.fieldnames
+            fieldnames = csv_reader.fieldnames  # 取得csv的欄位名稱
 
             with open(f"./{item}_trans.csv", "w", encoding="utf-8", newline="") as file:
+                # 新csv的欄位名稱
+                # ["年","月"] -> 將年/月加在新欄位名稱的開頭
+                # fieldnames[1:] -> 將其餘原始欄位名稱增加至新欄位名稱中
                 new_fieldnames = ["年", "月"] + fieldnames[1:]
                 csv_writer = csv.DictWriter(file, fieldnames=new_fieldnames)
                 csv_writer.writeheader()
@@ -155,16 +158,16 @@ def __download_credit_data() -> csv:
                 for row in csv_reader:
                     # 使用get方法，如果找不到對應的鍵，就保持原來的值
                     row["地區"] = area_code.get(row["地區"], row["地區"])
+                    # 將年月欄位分為年和月
                     year = row["年月"][:4]
                     month = row["年月"][4:]
+                    # 將新欄位資料寫入新csv中
                     new_row = {"年": year, "月": month, "地區": row["地區"]}
-                    new_row.update(row)
-                    del new_row["年月"]
+                    new_row.update(row)  # 加入原有的資料
+                    del new_row["年月"]  # 刪除原有的年月欄位
                     csv_writer.writerow(new_row)
 
                 print(f"{item}_trans.csv建立成功")
-
-    
 
 
 # ---------輸入資料---------#
@@ -173,11 +176,11 @@ def csv_to_database(conn: sqlite3.Connection) -> None:
     for item in DataType:
         file = f"./{item}_trans.csv"
         df = pd.read_csv(file)
-        
-        df.rename(columns={'信用卡交易金額[新台幣]':'信用卡金額'}, inplace=True)
+        # 更改最後一個欄位名稱
+        df.rename(columns={"信用卡交易金額[新台幣]": "信用卡金額"}, inplace=True)
+        # 將Dataframe輸入至SQLite資料庫中
         df.to_sql(item, conn, if_exists="append", index=False)
 
-    
     conn.close()
 
 
