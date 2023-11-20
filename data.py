@@ -56,8 +56,8 @@ def __download_credit_data() -> csv:
         "10016000": "澎湖縣",
         "10017000": "基隆市",
         "10018000": "新竹市",
-        "09020000": "金門縣",
-        "09007000": "連江縣",
+        "9020000": "金門縣",
+        "9007000": "連江縣",
     }
     industry = ["FD", "CT", "LG", "TR", "EE", "DP", "X2", "OT", " IDSUM", "ALL"]
     DataType = ["sex", "job", "incom", "education", "age"]
