@@ -809,6 +809,7 @@ class PokemonTreeView(ttk.Treeview):
                 matching_items.append(values)
         return matching_items
 
+    #------新增(還未修改好)------#
     def selected_fruit(self):
         selected_item = Window.f.get() 
         cursor = self.conn.cursor()
