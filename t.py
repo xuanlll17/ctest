@@ -772,6 +772,7 @@ class PokemonTreeView(ttk.Treeview):
         super().__init__(parent, **kwargs)
         self.parent = parent
         self.conn = sqlite3.connect("pokemon_database.db")
+        #self.window = Window()
         # 欄位名稱
         self.heading("name", text="名稱")
         self.heading("level", text="等級")
@@ -809,16 +810,16 @@ class PokemonTreeView(ttk.Treeview):
         return matching_items
 
     def selected_fruit(self):
-        
+        selected_item = Window.f.get() 
         cursor = self.conn.cursor()
-        
-        rows = cursor.fetchall()
+        sql = f"SELECT name,level,sp FROM pokemon WHERE help_fruit = '{selected_item}'"
+        data = pd.read_sql_query(sql, self.conn)
 
         for item in self.get_children():
             self.delete(item)
 
-        for row in rows:
-            self.insert("", "end", values=row)
+        for index, row in data.iterrows():
+            self.insert("", "end", values=(row['name'], row['level'], row['sp']))
 
 
 if __name__ == "__main__":
