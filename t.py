@@ -104,6 +104,7 @@ class Window(tk.Tk):
         fruit_type["menu"] = fruit_type_menu
         fruit_type.pack(padx=10, pady=10, side=tk.RIGHT)
 
+        #------修改------#
         fruit_type.bind("<Button-1>", self.selected_type)
         # tree view-----------------------------------------------------
         self.treeview = tk.Frame(self)
@@ -140,6 +141,7 @@ class Window(tk.Tk):
             ):
                 self.pokemon_data.delete(child)
 
+    #------修改------#
     def selected_type(self, event):
         selected = self.f.get()
         print(selected)
@@ -806,7 +808,7 @@ class PokemonTreeView(ttk.Treeview):
                 matching_items.append(values)
         return matching_items
 
-    def selected_fruit(self, word):
+    def selected_fruit(self):
         
         cursor = self.conn.cursor()
         
