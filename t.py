@@ -810,10 +810,9 @@ class PokemonTreeView(ttk.Treeview):
         return matching_items
 
     #------新增(還未修改好)------#
-    def selected_fruit(self):
-        selected_item = Window.f.get() 
+    def selected_fruit(self, selected):
         cursor = self.conn.cursor()
-        sql = f"SELECT name,level,sp FROM pokemon WHERE help_fruit = '{selected_item}'"
+        sql = f"SELECT name,level,sp FROM pokemon WHERE help_fruit = '{selected}'"
         data = pd.read_sql_query(sql, self.conn)
 
         for item in self.get_children():
