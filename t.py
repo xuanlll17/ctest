@@ -772,7 +772,7 @@ class PokemonTreeView(ttk.Treeview):
         super().__init__(parent, **kwargs)
         self.parent = parent
         self.conn = sqlite3.connect("pokemon_database.db")
-        #self.window = Window()
+       
         # 欄位名稱
         self.heading("name", text="名稱")
         self.heading("level", text="等級")
