@@ -151,7 +151,7 @@ class Window(tk.Tk):
 
         self.botton = tk.Button(
             topFrame, text="搜尋", state="active", command=self.load_treeview
-        ).grid(row=5, column=1, sticky=tk.E, padx=10)
+        ).grid(row=5, column=1)
         topFrame.pack(side=tk.LEFT, padx=(5, 5), fill="y")
 
         # ------------資料呈現------------#
@@ -235,11 +235,7 @@ class Window(tk.Tk):
 
             # 根据选择的数据类型显示或关闭图表
 
-            if (
-                selected_option == "教育程度類別"
-                or selected_option == "職業類別"
-                or selected_option == "年收入"
-            ):
+            if selected_option:
                 self.show_charts()
 
     def show_charts(self):
@@ -247,23 +243,97 @@ class Window(tk.Tk):
         table = self.data_mapping.get(selected_option)
         conn = sqlite3.connect("creditcard.db")
 
-        # Your SQL query
-        sql = f"SELECT 年, {selected_option}, SUM(信用卡金額) AS 信用卡交易總金額 FROM {table} GROUP BY 年, {selected_option}"
-
-        df = pd.read_sql_query(sql, conn)
-        pivot_df = df.pivot(index="年", columns=f"{selected_option}", values="信用卡交易總金額")
-
-        # Plotting the line chart
+        # Initialize fig and ax
         fig, ax = plt.subplots(figsize=(5, 2.5))
-        pivot_df.plot(kind="line", marker="o", linestyle="-", ax=ax)
-        ax.set_title(f"信用卡交易總金額 by 年 and {selected_option}")
-        ax.set_xlabel("年")
-        ax.set_ylabel("信用卡交易總金額")
-        ax.set_xticks(df["年"])
-        ax.legend().set_visible(False)
 
-        # Close the database connection
-        conn.close()
+        if (
+            selected_option == "教育程度類別"
+            or selected_option == "職業類別"
+            or selected_option == "年收入"
+        ):
+            # Your SQL query
+            sql = f"SELECT 年, {selected_option}, SUM(信用卡金額) AS 信用卡交易總金額 FROM {table} GROUP BY 年, {selected_option}"
+
+            df = pd.read_sql_query(sql, conn)
+            pivot_df = df.pivot(
+                index="年", columns=f"{selected_option}", values="信用卡交易總金額"
+            )
+
+            # Plotting the line chart
+            pivot_df.plot(kind="line", marker="o", linestyle="-", ax=ax)
+            ax.set_title(f"信用卡交易總金額 by 年 and {selected_option}")
+            ax.set_xlabel("年")
+            ax.set_ylabel("信用卡交易總金額")
+            ax.set_xticks(df["年"])
+            ax.legend().set_visible(False)
+
+        elif selected_option == "兩性":
+            sql_male = """
+                SELECT 年, SUM(信用卡金額) AS 信用卡交易總金額
+                FROM sex
+                WHERE 性別 = '男性'
+                GROUP BY 年
+            """
+
+            sql_female = """
+                SELECT 年, SUM(信用卡金額) AS 信用卡交易總金額
+                FROM sex
+                WHERE 性別 = '女性'
+                GROUP BY 年
+            """
+
+            df_male = pd.read_sql_query(sql_male, conn)
+            df_female = pd.read_sql_query(sql_female, conn)
+
+            ax.plot(
+                df_male["年"], df_male["信用卡交易總金額"], marker="o", label="男性", color="blue"
+            )
+            ax.plot(
+                df_female["年"],
+                df_female["信用卡交易總金額"],
+                marker="o",
+                label="女性",
+                color="orange",
+            )
+
+            ax.set_title("男女信用卡交易金額趨勢")
+            ax.set_xlabel("年份")
+            ax.set_ylabel("信用卡交易金額")
+            ax.set_xticks(df_male["年"])
+
+        elif selected_option == "年齡層":
+            sql = """
+                WITH ranked_data AS (
+                    SELECT
+                        年,
+                        年齡層,
+                        SUM(信用卡金額) AS 信用卡交易總金額,
+                        RANK() OVER (PARTITION BY 年 ORDER BY SUM(信用卡金額) DESC) AS rnk
+                    FROM
+                        age
+                    GROUP BY
+                        年,
+                        年齡層
+                )
+                SELECT
+                    年,
+                    年齡層,
+                    信用卡交易總金額
+                FROM
+                    ranked_data
+                WHERE
+                    rnk <= 10;
+            """
+            df = pd.read_sql_query(sql, conn)
+            pivot_df = df.pivot(
+                index="年", columns=f"{selected_option}", values="信用卡交易總金額"
+            )
+            pivot_df.plot(kind="line", marker="o", linestyle="-", ax=ax)
+            ax.set_title(f"信用卡交易總金額 by 年 and {selected_option}")
+            ax.set_xlabel("年")
+            ax.set_ylabel("信用卡交易總金額")
+            ax.set_xticks(df["年"])
+            ax.legend().set_visible(False)
 
         # Create the canvas for the chart if it doesn't exist
         if not hasattr(self, "canvas_chart"):
@@ -341,6 +411,7 @@ class ShowDetail(Dialog):
 
 def main():
     window = Window()
+    window.geometry("1700x800")
     window.resizable(width=False, height=False)
     window.mainloop()
 
