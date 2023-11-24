@@ -341,7 +341,6 @@ class ShowDetail(Dialog):
 
 def main():
     window = Window()
-    window.geometry("1700x800")
     window.resizable(width=False, height=False)
     window.mainloop()
 
