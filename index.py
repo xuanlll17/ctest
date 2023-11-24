@@ -13,6 +13,9 @@ class Window(tk.Tk):
         self.title("信用卡消費樣態")
         self.conn = sqlite3.connect("creditcard.db")
         plt.rcParams["font.family"] = "Microsoft JhengHei"
+        self.bottomFrame1 = None
+        self.bottomFrame2 = None
+        self.bottomFrame3 = None
 
         # -----------interface-----------#
         mainFrame = tk.Frame(self, relief=tk.GROOVE, borderwidth=1)
@@ -45,14 +48,14 @@ class Window(tk.Tk):
         self.data_mapping = {
             "職業類別": "job",
             "年收入": "incom",
-            "教育程度": "education",
+            "教育程度類別": "education",
             "兩性": "sex",
             "年齡層": "age",
         }
         self.data = ttk.Combobox(
             topFrame,
             textvariable=self.data_var,
-            values=["職業類別", "年收入", "教育程度", "兩性", "年齡層"],
+            values=["職業類別", "年收入", "教育程度類別", "兩性", "年齡層"],
         )
         self.data.grid(row=0, column=1, padx=10, pady=(20, 10))
         self.data.bind("<<ComboboxSelected>>", self.load_data)
@@ -143,9 +146,12 @@ class Window(tk.Tk):
             textvariable=self.industry_var,
             values=["食", "衣", "住", "行", "文教康樂", "百貨", "其他", "ALL"],
         )
-        self.industry.grid(row=4, column=1, padx=10, pady=(10, 30))
+        self.industry.grid(row=4, column=1, padx=10, pady=10)
         self.industry.bind("<<ComboboxSelected>>", self.load_industry)
 
+        self.botton = tk.Button(
+            topFrame, text="搜尋", state="active", command=self.load_treeview
+        ).grid(row=5, column=1, sticky=tk.E, padx=10)
         topFrame.pack(side=tk.LEFT, padx=(5, 5), fill="y")
 
         # ------------資料呈現------------#
@@ -164,171 +170,41 @@ class Window(tk.Tk):
         middleFrame.pack(padx=(0, 10), pady=(0, 10), fill="x")
 
         # ------------分析------------#
-        # 連接 SQLite 資料庫
-        conn = sqlite3.connect("creditcard.db")
-
-        # 撰寫 SQL 查詢，計算每年男性信用卡金額總數
-        sql_male = """
-            SELECT 年, SUM(信用卡金額) AS 信用卡交易總金額
-            FROM sex
-            WHERE 性別 = '男性'
-            GROUP BY 年
-        """
-
-        sql_female = """
-            SELECT 年, SUM(信用卡金額) AS 信用卡交易總金額
-            FROM sex
-            WHERE 性別 = '女性'
-            GROUP BY 年
-        """
-
-        sql = """
-            SELECT DISTINCT 年
-            FROM sex
-        """
-
-        # 使用 pandas 的 read_sql_query 方法執行 SQL 查詢，並將結果存入 DataFrame
-        df_male = pd.read_sql_query(sql_male, conn)
-        df_female = pd.read_sql_query(sql_female, conn)
-        df = pd.read_sql_query(sql, conn)
-
-        # 關閉資料庫連接
-        conn.close()
-
-        # 創建 ttk.Labelframe
-        bottomFrame1 = ttk.Labelframe(self, text="信用卡交易金額趨勢")
+        bottomFrame1 = ttk.Labelframe(self, text="圓餅圖")
+        self.bottomFrame1 = bottomFrame1
         bottomFrame1.pack(side=tk.LEFT, padx=(0, 5), pady=(0, 10))
 
-        # 在 Labelframe 中添加 Canvas
-        fig, ax = plt.subplots(figsize=(3.9, 2.5))  # 調整寬度和高度的值
-        canvas = FigureCanvasTkAgg(fig, master=bottomFrame1)
-        canvas_widget = canvas.get_tk_widget()
-        canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=10, pady=10)
-
-        # 繪製男性折線圖，使用藍色
-        ax.plot(df_male["年"], df_male["信用卡交易總金額"], marker="o", label="男性", color="blue")
-
-        # 繪製女性折線圖，使用紅色
-        ax.plot(
-            df_female["年"],
-            df_female["信用卡交易總金額"],
-            marker="o",
-            label="女性",
-            color="orange",
-        )
-
-        # 加上標題及標籤
-        ax.set_title("男女信用卡交易金額趨勢")
-        ax.set_xlabel("年份")
-        ax.set_ylabel("信用卡交易金額")
-        ax.set_xticks(df["年"])
-
-        # 加上圖例
-        ax.legend()
-
-        # 顯示圖表
-        canvas.draw()
-
-        bottomFrame2 = ttk.Labelframe(self, text="男女信用卡交易金額趨勢")
+        bottomFrame2 = ttk.Labelframe(self, text="長條圖")
+        self.bottomFrame2 = bottomFrame2
         bottomFrame2.pack(side=tk.LEFT, padx=(0, 5), pady=(0, 10))
 
-        # 在 Labelframe 中添加 Canvas
-        fig, ax = plt.subplots(figsize=(5, 2.5))  # 調整寬度和高度的值
-        canvas = FigureCanvasTkAgg(fig, master=bottomFrame2)
-        canvas_widget = canvas.get_tk_widget()
-        canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=10, pady=10)
-
-        # 繪製男性折線圖，使用藍色
-        ax.plot(df_male["年"], df_male["信用卡交易總金額"], marker="o", label="男性", color="blue")
-
-        # 繪製女性折線圖，使用紅色
-        ax.plot(
-            df_female["年"],
-            df_female["信用卡交易總金額"],
-            marker="o",
-            label="女性",
-            color="orange",
-        )
-
-        # 加上標題及標籤
-        ax.set_title("男女信用卡交易金額趨勢")
-        ax.set_xlabel("年份")
-        ax.set_ylabel("信用卡交易金額")
-        ax.set_xticks(df["年"])
-
-        # 加上圖例
-        ax.legend()
-
-        # 顯示圖表
-        canvas.draw()
-
-        bottomFrame3 = ttk.Labelframe(self, text="男女信用卡交易金額趨勢")
-        bottomFrame3.pack(side=tk.LEFT, padx=(0, 20), pady=(0, 10))
-
-        # 在 Labelframe 中添加 Canvas
-        fig, ax = plt.subplots(figsize=(5, 2.5))  # 調整寬度和高度的值
-        canvas = FigureCanvasTkAgg(fig, master=bottomFrame3)
-        canvas_widget = canvas.get_tk_widget()
-        canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=10, pady=10)
-
-        # 繪製男性折線圖，使用藍色
-        ax.plot(df_male["年"], df_male["信用卡交易總金額"], marker="o", label="男性", color="blue")
-
-        # 繪製女性折線圖，使用紅色
-        ax.plot(
-            df_female["年"],
-            df_female["信用卡交易總金額"],
-            marker="o",
-            label="女性",
-            color="orange",
-        )
-
-        # 加上標題及標籤
-        ax.set_title("男女信用卡交易金額趨勢")
-        ax.set_xlabel("年份")
-        ax.set_ylabel("信用卡交易金額")
-        ax.set_xticks(df["年"])
-
-        # 加上圖例
-        ax.legend()
-
-        # 顯示圖表
-        canvas.draw()
+        bottomFrame3 = ttk.Labelframe(self, text="折線圖")
+        self.bottomFrame3 = bottomFrame3
+        bottomFrame3.pack(side=tk.LEFT, padx=(0, 5), pady=(0, 10))
 
         # Bind the event after creating self.treeview
         self.treeview.bind("<ButtonRelease-1>", self.selectedItem)
         self.treeview.bind("<<TreeviewSelect>>", self.selectedItem)
-        # Bind the window close event to the method self.on_close
-        self.protocol("WM_DELETE_WINDOW", self.on_close)
-
-    def on_close(self):
-        # This method will be called when the window is closed
-        self.destroy()
 
     def load_data(self, event):
         selected_data = self.data_var.get()
         print(f"Data:{selected_data}")
-        self.load_treeview()
 
     def load_year(self, event):
         selected_year = self.year_var.get()
         print(f"Year:{selected_year}")
-        self.load_treeview()
 
     def load_month(self, event):
         selected_month = self.month_var.get()
         print(f"Month:{selected_month}")
-        self.load_treeview()
 
     def load_area(self, event):
         selected_area = self.area_var.get()
         print(f"Area:{selected_area}")
-        self.load_treeview()
 
     def load_industry(self, event):
         selected_industry = self.industry_var.get()
         print(f"Industry:{selected_industry}")
-        self.load_treeview()
 
     def load_treeview(self):
         selected_option = self.data_var.get()
@@ -356,6 +232,58 @@ class Window(tk.Tk):
 
             data = pd.read_sql_query(sql, self.conn)
             self.display_data(data)
+
+            # 根据选择的数据类型显示或关闭图表
+
+            if (
+                selected_option == "教育程度類別"
+                or selected_option == "職業類別"
+                or selected_option == "年收入"
+            ):
+                self.show_charts()
+
+    def show_charts(self):
+        selected_option = self.data_var.get()
+        table = self.data_mapping.get(selected_option)
+        conn = sqlite3.connect("creditcard.db")
+
+        # Your SQL query
+        sql = f"SELECT 年, {selected_option}, SUM(信用卡金額) AS 信用卡交易總金額 FROM {table} GROUP BY 年, {selected_option}"
+
+        df = pd.read_sql_query(sql, conn)
+        pivot_df = df.pivot(index="年", columns=f"{selected_option}", values="信用卡交易總金額")
+
+        # Plotting the line chart
+        fig, ax = plt.subplots(figsize=(5, 2.5))
+        pivot_df.plot(kind="line", marker="o", linestyle="-", ax=ax)
+        ax.set_title(f"信用卡交易總金額 by 年 and {selected_option}")
+        ax.set_xlabel("年")
+        ax.set_ylabel("信用卡交易總金額")
+        ax.set_xticks(df["年"])
+        ax.legend().set_visible(False)
+
+        # Close the database connection
+        conn.close()
+
+        # Create the canvas for the chart if it doesn't exist
+        if not hasattr(self, "canvas_chart"):
+            self.canvas_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame3)
+            canvas_widget = self.canvas_chart.get_tk_widget()
+            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=10, pady=10)
+        else:
+            # Update the content of the existing canvas
+            self.canvas_chart.get_tk_widget().destroy()
+            self.canvas_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame3)
+            canvas_widget = self.canvas_chart.get_tk_widget()
+            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=10, pady=10)
+
+        # Show the chart
+        self.canvas_chart.draw()
+
+    # def hide_gender_charts(self):
+    # 隐藏图表
+    # if self.bottomFrame3:
+    # self.bottomFrame3.pack_forget()
 
     def selectedItem(self, event):
         selected_item = self.treeview.focus()
@@ -413,6 +341,7 @@ class ShowDetail(Dialog):
 
 def main():
     window = Window()
+    window.geometry("1700x800")
     window.resizable(width=False, height=False)
     window.mainloop()
 
