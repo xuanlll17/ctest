@@ -12,52 +12,49 @@ class Window(tk.Tk):
         super().__init__(**kwargs)
         self.title("信用卡消費樣態")
         self.conn = sqlite3.connect("creditcard.db")
-        plt.rcParams['font.family'] = 'Microsoft JhengHei'
+        plt.rcParams["font.family"] = "Microsoft JhengHei"
 
         # -----------interface-----------#
-        mainFrame = tk.Frame(self, relief=tk.GROOVE,borderwidth=1)
-        tk.Label(
-            mainFrame,
-            text="信用卡消費樣態",
-            font=("arial", 20),
-            fg="#333333"
-        ).pack(padx=10, pady=10)
-        mainFrame.pack(padx=5, pady=10, fill='both')
+        mainFrame = tk.Frame(self, relief=tk.GROOVE, borderwidth=1)
+        tk.Label(mainFrame, text="信用卡消費樣態", font=("arial", 20), fg="#333333").pack(
+            padx=10, pady=10
+        )
+        mainFrame.pack(padx=5, pady=10, fill="both")
 
         # ------搜尋------#
         topFrame = ttk.Labelframe(self, text="搜尋")
         # -------Label------#
         self.dataLabel = ttk.Label(topFrame, text="資料類別:").grid(
-            row=0, column=0, padx=(1,0), pady=(20,10), sticky='w'
+            row=0, column=0, padx=(1, 0), pady=(20, 10), sticky="w"
         )
         self.yearLabel = ttk.Label(topFrame, text="年份:").grid(
-            row=1, column=0, padx=(1,0), pady=10, sticky='w'
+            row=1, column=0, padx=(1, 0), pady=10, sticky="w"
         )
         self.monthLabel = ttk.Label(topFrame, text="月份:").grid(
-            row=2, column=0, padx=(1,0), pady=10, sticky='w'
+            row=2, column=0, padx=(1, 0), pady=10, sticky="w"
         )
         self.areaLabel = ttk.Label(topFrame, text="地區:").grid(
-            row=3, column=0, padx=(1,0), pady=10, sticky='w'
+            row=3, column=0, padx=(1, 0), pady=10, sticky="w"
         )
         self.industryLabel = ttk.Label(topFrame, text="產業別:").grid(
-            row=4, column=0, padx=(1,0), pady=(10,30), sticky='w'
+            row=4, column=0, padx=(1, 0), pady=(10, 30), sticky="w"
         )
         # ------StringVar------#
         self.data_var = tk.StringVar()
         self.data_var.set("請選擇資料類型")
         self.data_mapping = {
-            '職業類別':'job', 
-            '年收入':'incom',
-            '教育程度':'education',
-            '兩性':'sex',
-            '年齡層':'age'
+            "職業類別": "job",
+            "年收入": "incom",
+            "教育程度": "education",
+            "兩性": "sex",
+            "年齡層": "age",
         }
         self.data = ttk.Combobox(
             topFrame,
             textvariable=self.data_var,
             values=["職業類別", "年收入", "教育程度", "兩性", "年齡層"],
         )
-        self.data.grid(row=0, column=1, padx=10, pady=(20,10))
+        self.data.grid(row=0, column=1, padx=10, pady=(20, 10))
         self.data.bind("<<ComboboxSelected>>", self.load_data)
 
         self.year_var = tk.StringVar()
@@ -146,15 +143,15 @@ class Window(tk.Tk):
             textvariable=self.industry_var,
             values=["食", "衣", "住", "行", "文教康樂", "百貨", "其他", "ALL"],
         )
-        self.industry.grid(row=4, column=1, padx=10, pady=(10,30))
+        self.industry.grid(row=4, column=1, padx=10, pady=(10, 30))
         self.industry.bind("<<ComboboxSelected>>", self.load_industry)
 
-        topFrame.pack(side=tk.LEFT, padx=(5,5), fill="y")
+        topFrame.pack(side=tk.LEFT, padx=(5, 5), fill="y")
 
         # ------------資料呈現------------#
         middleFrame = ttk.Labelframe(self, text="資料")
         self.treeview = ttk.Treeview(middleFrame, show="headings", height=18)
-        self.treeview.grid(row=0, column=0, padx=(5,0), pady=10, sticky="ns")
+        self.treeview.grid(row=0, column=0, padx=(5, 0), pady=10, sticky="ns")
 
         # -----垂直滾動條------#
         scrollBar = ttk.Scrollbar(
@@ -164,7 +161,7 @@ class Window(tk.Tk):
 
         self.treeview.configure(yscrollcommand=scrollBar.set)
 
-        middleFrame.pack(padx=(0,10), pady=(0,10), fill='x')
+        middleFrame.pack(padx=(0, 10), pady=(0, 10), fill="x")
 
         # ------------分析------------#
         # 連接 SQLite 資料庫
@@ -200,7 +197,7 @@ class Window(tk.Tk):
 
         # 創建 ttk.Labelframe
         bottomFrame1 = ttk.Labelframe(self, text="信用卡交易金額趨勢")
-        bottomFrame1.pack(side=tk.LEFT,padx=(0,5),pady=(0, 10))
+        bottomFrame1.pack(side=tk.LEFT, padx=(0, 5), pady=(0, 10))
 
         # 在 Labelframe 中添加 Canvas
         fig, ax = plt.subplots(figsize=(3.9, 2.5))  # 調整寬度和高度的值
@@ -209,28 +206,31 @@ class Window(tk.Tk):
         canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=10, pady=10)
 
         # 繪製男性折線圖，使用藍色
-        ax.plot(df_male['年'], df_male['信用卡交易總金額'], marker='o', label='男性', color='blue')
+        ax.plot(df_male["年"], df_male["信用卡交易總金額"], marker="o", label="男性", color="blue")
 
         # 繪製女性折線圖，使用紅色
-        ax.plot(df_female['年'], df_female['信用卡交易總金額'], marker='o', label='女性', color='orange')
+        ax.plot(
+            df_female["年"],
+            df_female["信用卡交易總金額"],
+            marker="o",
+            label="女性",
+            color="orange",
+        )
 
         # 加上標題及標籤
-        ax.set_title('男女信用卡交易金額趨勢')
-        ax.set_xlabel('年份')
-        ax.set_ylabel('信用卡交易金額')
-        ax.set_xticks(df['年'])
+        ax.set_title("男女信用卡交易金額趨勢")
+        ax.set_xlabel("年份")
+        ax.set_ylabel("信用卡交易金額")
+        ax.set_xticks(df["年"])
 
         # 加上圖例
         ax.legend()
 
-        fig.clear(True)
-
         # 顯示圖表
         canvas.draw()
-        
 
         bottomFrame2 = ttk.Labelframe(self, text="男女信用卡交易金額趨勢")
-        bottomFrame2.pack(side=tk.LEFT,padx=(0,5),pady=(0, 10))
+        bottomFrame2.pack(side=tk.LEFT, padx=(0, 5), pady=(0, 10))
 
         # 在 Labelframe 中添加 Canvas
         fig, ax = plt.subplots(figsize=(5, 2.5))  # 調整寬度和高度的值
@@ -239,26 +239,31 @@ class Window(tk.Tk):
         canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=10, pady=10)
 
         # 繪製男性折線圖，使用藍色
-        ax.plot(df_male['年'], df_male['信用卡交易總金額'], marker='o', label='男性', color='blue')
+        ax.plot(df_male["年"], df_male["信用卡交易總金額"], marker="o", label="男性", color="blue")
 
         # 繪製女性折線圖，使用紅色
-        ax.plot(df_female['年'], df_female['信用卡交易總金額'], marker='o', label='女性', color='orange')
+        ax.plot(
+            df_female["年"],
+            df_female["信用卡交易總金額"],
+            marker="o",
+            label="女性",
+            color="orange",
+        )
 
         # 加上標題及標籤
-        ax.set_title('男女信用卡交易金額趨勢')
-        ax.set_xlabel('年份')
-        ax.set_ylabel('信用卡交易金額')
-        ax.set_xticks(df['年'])
+        ax.set_title("男女信用卡交易金額趨勢")
+        ax.set_xlabel("年份")
+        ax.set_ylabel("信用卡交易金額")
+        ax.set_xticks(df["年"])
 
         # 加上圖例
         ax.legend()
 
         # 顯示圖表
         canvas.draw()
-        
 
         bottomFrame3 = ttk.Labelframe(self, text="男女信用卡交易金額趨勢")
-        bottomFrame3.pack(side=tk.LEFT,padx=(0,20),pady=(0, 10))
+        bottomFrame3.pack(side=tk.LEFT, padx=(0, 20), pady=(0, 10))
 
         # 在 Labelframe 中添加 Canvas
         fig, ax = plt.subplots(figsize=(5, 2.5))  # 調整寬度和高度的值
@@ -267,29 +272,38 @@ class Window(tk.Tk):
         canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=10, pady=10)
 
         # 繪製男性折線圖，使用藍色
-        ax.plot(df_male['年'], df_male['信用卡交易總金額'], marker='o', label='男性', color='blue')
+        ax.plot(df_male["年"], df_male["信用卡交易總金額"], marker="o", label="男性", color="blue")
 
         # 繪製女性折線圖，使用紅色
-        ax.plot(df_female['年'], df_female['信用卡交易總金額'], marker='o', label='女性', color='orange')
+        ax.plot(
+            df_female["年"],
+            df_female["信用卡交易總金額"],
+            marker="o",
+            label="女性",
+            color="orange",
+        )
 
         # 加上標題及標籤
-        ax.set_title('男女信用卡交易金額趨勢')
-        ax.set_xlabel('年份')
-        ax.set_ylabel('信用卡交易金額')
-        ax.set_xticks(df['年'])
+        ax.set_title("男女信用卡交易金額趨勢")
+        ax.set_xlabel("年份")
+        ax.set_ylabel("信用卡交易金額")
+        ax.set_xticks(df["年"])
 
         # 加上圖例
         ax.legend()
 
         # 顯示圖表
         canvas.draw()
-      
-
-        
 
         # Bind the event after creating self.treeview
         self.treeview.bind("<ButtonRelease-1>", self.selectedItem)
         self.treeview.bind("<<TreeviewSelect>>", self.selectedItem)
+        # Bind the window close event to the method self.on_close
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
+
+    def on_close(self):
+        # This method will be called when the window is closed
+        self.destroy()
 
     def load_data(self, event):
         selected_data = self.data_var.get()
@@ -327,18 +341,10 @@ class Window(tk.Tk):
         if table and selected_option and selected_year:
             sql = f"SELECT * FROM {table} WHERE 年 = '{selected_year}'"
 
-            if (
-                selected_month
-                and selected_month != "請選擇月份"
-                and selected_month != "ALL"
-            ):
+            if selected_month and selected_month != "請選擇月份" and selected_month != "ALL":
                 sql += f" AND 月 = '{selected_month}'"
 
-            if (
-                selected_area
-                and selected_area != "請選擇地區"
-                and selected_area != "ALL"
-            ):
+            if selected_area and selected_area != "請選擇地區" and selected_area != "ALL":
                 sql += f" AND 地區 = '{selected_area}'"
 
             if (
@@ -373,7 +379,6 @@ class Window(tk.Tk):
             for index, row in data.iterrows():
                 values = [row[col] for col in columns]
                 self.treeview.insert("", "end", values=values)
-            
 
 
 class ShowDetail(Dialog):
