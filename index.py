@@ -236,9 +236,11 @@ class Window(tk.Tk):
             # 根据选择的数据类型显示或关闭图表
 
             if selected_option:
-                self.show_charts()
+                self.show_line_charts()
+                self.show_pie_charts()
+                self.show_bar_charts()
 
-    def show_charts(self):
+    def show_line_charts(self):
         selected_option = self.data_var.get()
         table = self.data_mapping.get(selected_option)
         conn = sqlite3.connect("creditcard.db")
@@ -336,24 +338,183 @@ class Window(tk.Tk):
             ax.legend().set_visible(False)
 
         # Create the canvas for the chart if it doesn't exist
-        if not hasattr(self, "canvas_chart"):
-            self.canvas_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame3)
-            canvas_widget = self.canvas_chart.get_tk_widget()
+        if not hasattr(self, "canvas_line_chart"):
+            self.canvas_line_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame3)
+            canvas_widget = self.canvas_line_chart.get_tk_widget()
             canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=10, pady=10)
         else:
             # Update the content of the existing canvas
-            self.canvas_chart.get_tk_widget().destroy()
-            self.canvas_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame3)
-            canvas_widget = self.canvas_chart.get_tk_widget()
+            self.canvas_line_chart.get_tk_widget().destroy()
+            self.canvas_line_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame3)
+            canvas_widget = self.canvas_line_chart.get_tk_widget()
             canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=10, pady=10)
 
         # Show the chart
-        self.canvas_chart.draw()
+        self.canvas_line_chart.draw()
 
-    # def hide_gender_charts(self):
-    # 隐藏图表
-    # if self.bottomFrame3:
-    # self.bottomFrame3.pack_forget()
+    def show_pie_charts(self):
+        selected_option = self.data_var.get()
+        table = self.data_mapping.get(selected_option)
+        conn = sqlite3.connect("creditcard.db")
+
+        # Initialize fig and ax
+        fig, ax = plt.subplots(figsize=(5, 2.5))
+
+        if (
+            selected_option == "教育程度類別"
+            or selected_option == "職業類別"
+            or selected_option == "年收入"
+        ):
+            # Your SQL query
+            sql = f"SELECT {selected_option}, SUM(信用卡金額) AS 信用卡交易總金額 FROM {table} GROUP BY {selected_option}"
+
+            df = pd.read_sql_query(sql, conn)
+            ax.pie(
+                df["信用卡交易總金額"],
+                labels=df[selected_option],
+                autopct="%1.1f%%",
+                startangle=90,
+            )
+            ax.set_title(f"信用卡交易總金額 by {selected_option}")
+
+        elif selected_option == "兩性":
+            sql_male = """
+                SELECT SUM(信用卡金額) AS 信用卡交易總金額
+                FROM sex
+                WHERE 性別 = '男性'
+            """
+
+            sql_female = """
+                SELECT SUM(信用卡金額) AS 信用卡交易總金額
+                FROM sex
+                WHERE 性別 = '女性'
+            """
+
+            df_male = pd.read_sql_query(sql_male, conn)
+            df_female = pd.read_sql_query(sql_female, conn)
+
+            labels = ["男性", "女性"]
+            sizes = [df_male["信用卡交易總金額"].values[0], df_female["信用卡交易總金額"].values[0]]
+            ax.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90)
+            ax.set_title("男女信用卡交易金額分佈")
+
+        elif selected_option == "年齡層":
+            sql = """
+                WITH ranked_data AS (
+                    SELECT
+                        年齡層,
+                        SUM(信用卡金額) AS 信用卡交易總金額
+                    FROM
+                        age
+                    GROUP BY
+                        年齡層
+                )
+                SELECT
+                    年齡層,
+                    信用卡交易總金額
+                FROM
+                    ranked_data;
+            """
+            df = pd.read_sql_query(sql, conn)
+            ax.pie(df["信用卡交易總金額"], labels=df["年齡層"], autopct="%1.1f%%", startangle=90)
+            ax.set_title(f"信用卡交易總金額 by 年齡層")
+
+        # Create the canvas for the chart if it doesn't exist
+        if not hasattr(self, "canvas_pie_chart"):
+            self.canvas_pie_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame2)
+            canvas_widget = self.canvas_pie_chart.get_tk_widget()
+            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=10, pady=10)
+        else:
+            # Update the content of the existing canvas
+            self.canvas_pie_chart.get_tk_widget().destroy()
+            self.canvas_pie_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame2)
+            canvas_widget = self.canvas_pie_chart.get_tk_widget()
+            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=10, pady=10)
+
+        # Show the chart
+        self.canvas_pie_chart.draw()
+
+    def show_bar_charts(self):
+        selected_option = self.data_var.get()
+        table = self.data_mapping.get(selected_option)
+        conn = sqlite3.connect("creditcard.db")
+
+        # Initialize fig and ax
+        fig, ax = plt.subplots(figsize=(3, 2.5))
+
+        if (
+            selected_option == "教育程度類別"
+            or selected_option == "職業類別"
+            or selected_option == "年收入"
+        ):
+            # Your SQL query
+            sql = f"SELECT {selected_option}, SUM(信用卡金額) AS 信用卡交易總金額 FROM {table} GROUP BY {selected_option}"
+
+            df = pd.read_sql_query(sql, conn)
+            ax.pie(
+                df["信用卡交易總金額"],
+                labels=df[selected_option],
+                autopct="%1.1f%%",
+                startangle=90,
+            )
+            ax.set_title(f"信用卡交易總金額 by {selected_option}")
+
+        elif selected_option == "兩性":
+            sql_male = """
+                SELECT SUM(信用卡金額) AS 信用卡交易總金額
+                FROM sex
+                WHERE 性別 = '男性'
+            """
+
+            sql_female = """
+                SELECT SUM(信用卡金額) AS 信用卡交易總金額
+                FROM sex
+                WHERE 性別 = '女性'
+            """
+
+            df_male = pd.read_sql_query(sql_male, conn)
+            df_female = pd.read_sql_query(sql_female, conn)
+
+            labels = ["男性", "女性"]
+            sizes = [df_male["信用卡交易總金額"].values[0], df_female["信用卡交易總金額"].values[0]]
+            ax.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90)
+            ax.set_title("男女信用卡交易金額分佈")
+
+        elif selected_option == "年齡層":
+            sql = """
+                WITH ranked_data AS (
+                    SELECT
+                        年齡層,
+                        SUM(信用卡金額) AS 信用卡交易總金額
+                    FROM
+                        age
+                    GROUP BY
+                        年齡層
+                )
+                SELECT
+                    年齡層,
+                    信用卡交易總金額
+                FROM
+                    ranked_data;
+            """
+            df = pd.read_sql_query(sql, conn)
+            ax.pie(df["信用卡交易總金額"], labels=df["年齡層"], autopct="%1.1f%%", startangle=90)
+            ax.set_title(f"信用卡交易總金額 by 年齡層")
+
+        # Create the canvas for the chart if it doesn't exist
+        if not hasattr(self, "canvas_bar_chart"):
+            self.canvas_bar_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame1)
+            canvas_widget = self.canvas_bar_chart.get_tk_widget()
+            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=5, pady=5)
+        else:
+            # Update the content of the existing canvas
+            self.canvas_bar_chart.get_tk_widget().destroy()
+            self.canvas_bar_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame1)
+            canvas_widget = self.canvas_bar_chart.get_tk_widget()
+            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=5, pady=5)
+
+        # Show the chart
+        self.canvas_bar_chart.draw()
 
     def selectedItem(self, event):
         selected_item = self.treeview.focus()
@@ -411,7 +572,6 @@ class ShowDetail(Dialog):
 
 def main():
     window = Window()
-    window.geometry("1700x800")
     window.resizable(width=False, height=False)
     window.mainloop()
 
