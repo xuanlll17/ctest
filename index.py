@@ -233,8 +233,6 @@ class Window(tk.Tk):
             data = pd.read_sql_query(sql, self.conn)
             self.display_data(data)
 
-            # 根据选择的数据类型显示或关闭图表
-
             if selected_option:
                 self.show_line_charts()
                 self.show_pie_charts()
@@ -246,7 +244,7 @@ class Window(tk.Tk):
         conn = sqlite3.connect("creditcard.db")
 
         # Initialize fig and ax
-        fig, ax = plt.subplots(figsize=(5, 2.5))
+        fig, ax = plt.subplots(figsize=(5, 3))
 
         if (
             selected_option == "教育程度類別"
@@ -358,7 +356,7 @@ class Window(tk.Tk):
         conn = sqlite3.connect("creditcard.db")
 
         # Initialize fig and ax
-        fig, ax = plt.subplots(figsize=(5, 2.5))
+        fig, ax = plt.subplots(figsize=(4, 3))
 
         if (
             selected_option == "教育程度類別"
@@ -369,12 +367,7 @@ class Window(tk.Tk):
             sql = f"SELECT {selected_option}, SUM(信用卡金額) AS 信用卡交易總金額 FROM {table} GROUP BY {selected_option}"
 
             df = pd.read_sql_query(sql, conn)
-            ax.pie(
-                df["信用卡交易總金額"],
-                labels=df[selected_option],
-                autopct="%1.1f%%",
-                startangle=90,
-            )
+            ax.pie(df["信用卡交易總金額"], labels=df[selected_option], startangle=90)
             ax.set_title(f"信用卡交易總金額 by {selected_option}")
 
         elif selected_option == "兩性":
@@ -395,7 +388,14 @@ class Window(tk.Tk):
 
             labels = ["男性", "女性"]
             sizes = [df_male["信用卡交易總金額"].values[0], df_female["信用卡交易總金額"].values[0]]
-            ax.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90)
+            ax.pie(
+                sizes,
+                labels=labels,
+                startangle=90,
+                textprops={"fontsize": 3},
+                radius=1.2,
+                wedgeprops=dict(width=0.3),
+            )
             ax.set_title("男女信用卡交易金額分佈")
 
         elif selected_option == "年齡層":
@@ -416,18 +416,23 @@ class Window(tk.Tk):
                     ranked_data;
             """
             df = pd.read_sql_query(sql, conn)
-            ax.pie(df["信用卡交易總金額"], labels=df["年齡層"], autopct="%1.1f%%", startangle=90)
+            ax.pie(
+                df["信用卡交易總金額"],
+                labels=df["年齡層"],
+                startangle=90,
+                textprops={"fontsize": 1},
+            )
             ax.set_title(f"信用卡交易總金額 by 年齡層")
 
         # Create the canvas for the chart if it doesn't exist
         if not hasattr(self, "canvas_pie_chart"):
-            self.canvas_pie_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame2)
+            self.canvas_pie_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame1)
             canvas_widget = self.canvas_pie_chart.get_tk_widget()
             canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=10, pady=10)
         else:
             # Update the content of the existing canvas
             self.canvas_pie_chart.get_tk_widget().destroy()
-            self.canvas_pie_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame2)
+            self.canvas_pie_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame1)
             canvas_widget = self.canvas_pie_chart.get_tk_widget()
             canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=10, pady=10)
 
@@ -440,7 +445,7 @@ class Window(tk.Tk):
         conn = sqlite3.connect("creditcard.db")
 
         # Initialize fig and ax
-        fig, ax = plt.subplots(figsize=(3, 2.5))
+        fig, ax = plt.subplots(figsize=(5, 3))
 
         if (
             selected_option == "教育程度類別"
@@ -451,13 +456,14 @@ class Window(tk.Tk):
             sql = f"SELECT {selected_option}, SUM(信用卡金額) AS 信用卡交易總金額 FROM {table} GROUP BY {selected_option}"
 
             df = pd.read_sql_query(sql, conn)
-            ax.pie(
+            ax.bar(
+                df[selected_option],
                 df["信用卡交易總金額"],
-                labels=df[selected_option],
-                autopct="%1.1f%%",
-                startangle=90,
+                color=["blue", "orange", "green", "red", "purple"],  # 設定顏色，可以根據需要自行調整
             )
             ax.set_title(f"信用卡交易總金額 by {selected_option}")
+            ax.set_xlabel(selected_option)
+            ax.set_ylabel("信用卡交易總金額")
 
         elif selected_option == "兩性":
             sql_male = """
@@ -476,9 +482,11 @@ class Window(tk.Tk):
             df_female = pd.read_sql_query(sql_female, conn)
 
             labels = ["男性", "女性"]
-            sizes = [df_male["信用卡交易總金額"].values[0], df_female["信用卡交易總金額"].values[0]]
-            ax.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90)
+            values = [df_male["信用卡交易總金額"].values[0], df_female["信用卡交易總金額"].values[0]]
+            ax.bar(labels, values, color=["blue", "orange"])
             ax.set_title("男女信用卡交易金額分佈")
+            ax.set_xlabel("性別")
+            ax.set_ylabel("信用卡交易總金額")
 
         elif selected_option == "年齡層":
             sql = """
@@ -498,20 +506,22 @@ class Window(tk.Tk):
                     ranked_data;
             """
             df = pd.read_sql_query(sql, conn)
-            ax.pie(df["信用卡交易總金額"], labels=df["年齡層"], autopct="%1.1f%%", startangle=90)
+            ax.bar(df["年齡層"], df["信用卡交易總金額"], color="blue")  # 設定顏色，可以根據需要自行調整
             ax.set_title(f"信用卡交易總金額 by 年齡層")
+            ax.set_xlabel("年齡層")
+            ax.set_ylabel("信用卡交易總金額")
 
         # Create the canvas for the chart if it doesn't exist
         if not hasattr(self, "canvas_bar_chart"):
-            self.canvas_bar_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame1)
+            self.canvas_bar_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame2)
             canvas_widget = self.canvas_bar_chart.get_tk_widget()
-            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=5, pady=5)
+            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=10, pady=10)
         else:
             # Update the content of the existing canvas
             self.canvas_bar_chart.get_tk_widget().destroy()
-            self.canvas_bar_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame1)
+            self.canvas_bar_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame2)
             canvas_widget = self.canvas_bar_chart.get_tk_widget()
-            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=5, pady=5)
+            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=10, pady=10)
 
         # Show the chart
         self.canvas_bar_chart.draw()
