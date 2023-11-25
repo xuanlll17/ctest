@@ -13,20 +13,17 @@ class Window(tk.Tk):
         self.title("信用卡消費樣態")
         self.conn = sqlite3.connect("creditcard.db")
         plt.rcParams["font.family"] = "Microsoft JhengHei"
-        self.bottomFrame1 = None
-        self.bottomFrame2 = None
-        self.bottomFrame3 = None
 
-        # -----------interface-----------#
+        # ------------介面-----------#
         mainFrame = tk.Frame(self, relief=tk.GROOVE, borderwidth=1)
         tk.Label(mainFrame, text="信用卡消費樣態", font=("arial", 20), fg="#333333").pack(
             padx=10, pady=10
         )
         mainFrame.pack(padx=5, pady=10, fill="both")
 
-        # ------搜尋------#
+        # ------------搜尋------------#
         topFrame = ttk.Labelframe(self, text="搜尋")
-        # -------Label------#
+        # ------Label------#
         self.dataLabel = ttk.Label(topFrame, text="資料類別:").grid(
             row=0, column=0, padx=(1, 0), pady=(20, 10), sticky="w"
         )
@@ -40,7 +37,7 @@ class Window(tk.Tk):
             row=3, column=0, padx=(1, 0), pady=10, sticky="w"
         )
         self.industryLabel = ttk.Label(topFrame, text="產業別:").grid(
-            row=4, column=0, padx=(1, 0), pady=(10, 30), sticky="w"
+            row=4, column=0, padx=(1, 0), pady=10, sticky="w"
         )
         # ------StringVar------#
         self.data_var = tk.StringVar()
@@ -49,16 +46,15 @@ class Window(tk.Tk):
             "職業類別": "job",
             "年收入": "incom",
             "教育程度類別": "education",
-            "兩性": "sex",
+            "性別": "sex",
             "年齡層": "age",
         }
         self.data = ttk.Combobox(
             topFrame,
             textvariable=self.data_var,
-            values=["職業類別", "年收入", "教育程度類別", "兩性", "年齡層"],
+            values=["職業類別", "年收入", "教育程度類別", "性別", "年齡層"],
         )
         self.data.grid(row=0, column=1, padx=10, pady=(20, 10))
-        self.data.bind("<<ComboboxSelected>>", self.load_data)
 
         self.year_var = tk.StringVar()
         self.year_var.set("請選擇年份")
@@ -79,7 +75,6 @@ class Window(tk.Tk):
             ],
         )
         self.year.grid(row=1, column=1, padx=10, pady=10)
-        self.year.bind("<<ComboboxSelected>>", self.load_year)
 
         self.month_var = tk.StringVar()
         self.month_var.set("請選擇月份")
@@ -103,7 +98,6 @@ class Window(tk.Tk):
             ],
         )
         self.month.grid(row=2, column=1, padx=10, pady=10)
-        self.month.bind("<<ComboboxSelected>>", self.load_month)
 
         self.area_var = tk.StringVar()
         self.area_var.set("請選擇地區")
@@ -137,7 +131,6 @@ class Window(tk.Tk):
             ],
         )
         self.area.grid(row=3, column=1, padx=10, pady=10)
-        self.area.bind("<<ComboboxSelected>>", self.load_area)
 
         self.industry_var = tk.StringVar()
         self.industry_var.set("請選擇產業別")
@@ -147,65 +140,45 @@ class Window(tk.Tk):
             values=["食", "衣", "住", "行", "文教康樂", "百貨", "其他", "ALL"],
         )
         self.industry.grid(row=4, column=1, padx=10, pady=10)
-        self.industry.bind("<<ComboboxSelected>>", self.load_industry)
 
         self.botton = tk.Button(
-            topFrame, text="搜尋", state="active", command=self.load_treeview
-        ).grid(row=5, column=1)
+            topFrame, text="搜尋", state="active", command=self.load_treeview, width=30
+        ).grid(row=5, column=0, padx=10, pady=20, columnspan=2)
         topFrame.pack(side=tk.LEFT, padx=(5, 5), fill="y")
 
-        # ------------資料呈現------------#
+        # -------------資料呈現------------#
         middleFrame = ttk.Labelframe(self, text="資料")
         self.treeview = ttk.Treeview(middleFrame, show="headings", height=18)
-        self.treeview.grid(row=0, column=0, padx=(5, 0), pady=10, sticky="ns")
+        self.treeview.grid(row=0, column=0, padx=5, pady=10, sticky="ns")
 
-        # -----垂直滾動條------#
+        # ------scrollbar------#
         scrollBar = ttk.Scrollbar(
             middleFrame, orient="vertical", command=self.treeview.yview
         )
-        scrollBar.grid(row=0, column=1, sticky="ns")  # 使用 grid 進行佈局管理
-
+        scrollBar.grid(row=0, column=1, sticky="ns")
         self.treeview.configure(yscrollcommand=scrollBar.set)
+        middleFrame.pack(padx=(0, 5), pady=(0, 10), fill="x")
 
-        middleFrame.pack(padx=(0, 10), pady=(0, 10), fill="x")
+        # ------------圖表-------------#
+        self.bottomFrame1 = ttk.Labelframe(self, text="圓餅圖")
+        self.bottomFrame1.pack(
+            side=tk.LEFT, padx=(0, 5), pady=(0, 5), expand=True, fill="both"
+        )
 
-        # ------------分析------------#
-        bottomFrame1 = ttk.Labelframe(self, text="圓餅圖")
-        self.bottomFrame1 = bottomFrame1
-        bottomFrame1.pack(side=tk.LEFT, padx=(0, 5), pady=(0, 10))
+        self.bottomFrame2 = ttk.Labelframe(self, text="長條圖")
+        self.bottomFrame2.pack(
+            side=tk.LEFT, padx=(0, 5), pady=(0, 5), expand=True, fill="both"
+        )
 
-        bottomFrame2 = ttk.Labelframe(self, text="長條圖")
-        self.bottomFrame2 = bottomFrame2
-        bottomFrame2.pack(side=tk.LEFT, padx=(0, 5), pady=(0, 10))
+        self.bottomFrame3 = ttk.Labelframe(self, text="折線圖")
+        self.bottomFrame3.pack(
+            side=tk.LEFT, padx=(0, 5), pady=(0, 5), expand=True, fill="both"
+        )
 
-        bottomFrame3 = ttk.Labelframe(self, text="折線圖")
-        self.bottomFrame3 = bottomFrame3
-        bottomFrame3.pack(side=tk.LEFT, padx=(0, 5), pady=(0, 10))
-
-        # Bind the event after creating self.treeview
+        # ------Bind------#
         self.treeview.bind("<ButtonRelease-1>", self.selectedItem)
-        self.treeview.bind("<<TreeviewSelect>>", self.selectedItem)
 
-    def load_data(self, event):
-        selected_data = self.data_var.get()
-        print(f"Data:{selected_data}")
-
-    def load_year(self, event):
-        selected_year = self.year_var.get()
-        print(f"Year:{selected_year}")
-
-    def load_month(self, event):
-        selected_month = self.month_var.get()
-        print(f"Month:{selected_month}")
-
-    def load_area(self, event):
-        selected_area = self.area_var.get()
-        print(f"Area:{selected_area}")
-
-    def load_industry(self, event):
-        selected_industry = self.industry_var.get()
-        print(f"Industry:{selected_industry}")
-
+    # ------------treeview------------#
     def load_treeview(self):
         selected_option = self.data_var.get()
         selected_year = self.year_var.get()
@@ -214,8 +187,11 @@ class Window(tk.Tk):
         selected_industry = self.industry_var.get()
         table = self.data_mapping.get(selected_option)
 
-        if table and selected_option and selected_year:
-            sql = f"SELECT * FROM {table} WHERE 年 = '{selected_year}'"
+        if table and selected_option and selected_year != "請選擇年份":
+            if selected_option == "年齡層":
+                sql = f"SELECT 年,月,地區,產業別,年齡層,信用卡交易筆數,信用卡金額 FROM {table} WHERE 年 = '{selected_year}'"
+            else:
+                sql = f"SELECT * FROM {table} WHERE 年 = '{selected_year}'"
 
             if selected_month and selected_month != "請選擇月份" and selected_month != "ALL":
                 sql += f" AND 月 = '{selected_month}'"
@@ -233,41 +209,36 @@ class Window(tk.Tk):
             data = pd.read_sql_query(sql, self.conn)
             self.display_data(data)
 
-            if selected_option:
-                self.show_line_charts()
-                self.show_pie_charts()
-                self.show_bar_charts()
+            self.show_line_charts()
+            self.show_pie_charts()
+            self.show_bar_charts()
 
+    # ------------折線圖------------#
     def show_line_charts(self):
         selected_option = self.data_var.get()
         table = self.data_mapping.get(selected_option)
         conn = sqlite3.connect("creditcard.db")
 
-        # Initialize fig and ax
         fig, ax = plt.subplots(figsize=(5, 3))
+        fig.subplots_adjust(bottom=0.1, top=0.9)
 
         if (
             selected_option == "教育程度類別"
             or selected_option == "職業類別"
             or selected_option == "年收入"
         ):
-            # Your SQL query
             sql = f"SELECT 年, {selected_option}, SUM(信用卡金額) AS 信用卡交易總金額 FROM {table} GROUP BY 年, {selected_option}"
-
             df = pd.read_sql_query(sql, conn)
             pivot_df = df.pivot(
                 index="年", columns=f"{selected_option}", values="信用卡交易總金額"
             )
-
-            # Plotting the line chart
             pivot_df.plot(kind="line", marker="o", linestyle="-", ax=ax)
-            ax.set_title(f"信用卡交易總金額 by 年 and {selected_option}")
-            ax.set_xlabel("年")
+            ax.set_title(f"各{selected_option}信用卡交易金額趨勢")
             ax.set_ylabel("信用卡交易總金額")
             ax.set_xticks(df["年"])
             ax.legend().set_visible(False)
 
-        elif selected_option == "兩性":
+        elif selected_option == "性別":
             sql_male = """
                 SELECT 年, SUM(信用卡金額) AS 信用卡交易總金額
                 FROM sex
@@ -322,42 +293,41 @@ class Window(tk.Tk):
                 FROM
                     ranked_data
                 WHERE
-                    rnk <= 10;
+                    rnk <= 8;
             """
             df = pd.read_sql_query(sql, conn)
             pivot_df = df.pivot(
                 index="年", columns=f"{selected_option}", values="信用卡交易總金額"
             )
             pivot_df.plot(kind="line", marker="o", linestyle="-", ax=ax)
-            ax.set_title(f"信用卡交易總金額 by 年 and {selected_option}")
-            ax.set_xlabel("年")
+            ax.set_title(f"各{selected_option}信用卡交易金額趨勢")
             ax.set_ylabel("信用卡交易總金額")
             ax.set_xticks(df["年"])
             ax.legend().set_visible(False)
 
-        # Create the canvas for the chart if it doesn't exist
+        # ------create canvas------#
         if not hasattr(self, "canvas_line_chart"):
             self.canvas_line_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame3)
             canvas_widget = self.canvas_line_chart.get_tk_widget()
-            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=10, pady=10)
+            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=5, pady=5)
         else:
-            # Update the content of the existing canvas
+            # ------update canvas content------#
             self.canvas_line_chart.get_tk_widget().destroy()
             self.canvas_line_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame3)
             canvas_widget = self.canvas_line_chart.get_tk_widget()
-            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=10, pady=10)
+            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=5, pady=5)
 
-        # Show the chart
         self.canvas_line_chart.draw()
 
+    # ------------圓餅圖------------#
     def show_pie_charts(self):
         selected_option = self.data_var.get()
         table = self.data_mapping.get(selected_option)
         conn = sqlite3.connect("creditcard.db")
 
         # Initialize fig and ax
-        fig, ax = plt.subplots(figsize=(4, 3))
-
+        fig, ax = plt.subplots(figsize=(3.66, 3))
+        fig.subplots_adjust(bottom=0.1, top=0.9)
         if (
             selected_option == "教育程度類別"
             or selected_option == "職業類別"
@@ -368,9 +338,12 @@ class Window(tk.Tk):
 
             df = pd.read_sql_query(sql, conn)
             ax.pie(df["信用卡交易總金額"], labels=df[selected_option], startangle=90)
-            ax.set_title(f"信用卡交易總金額 by {selected_option}")
+            if selected_option == "教育程度類別":
+                ax.set_title(f"各教育程度信用卡交易金額分布")
+            else:
+                ax.set_title(f"各{selected_option}信用卡交易金額分布")
 
-        elif selected_option == "兩性":
+        elif selected_option == "性別":
             sql_male = """
                 SELECT SUM(信用卡金額) AS 信用卡交易總金額
                 FROM sex
@@ -392,9 +365,8 @@ class Window(tk.Tk):
                 sizes,
                 labels=labels,
                 startangle=90,
-                textprops={"fontsize": 3},
+                textprops={"fontsize": 10},
                 radius=1.2,
-                wedgeprops=dict(width=0.3),
             )
             ax.set_title("男女信用卡交易金額分佈")
 
@@ -403,7 +375,8 @@ class Window(tk.Tk):
                 WITH ranked_data AS (
                     SELECT
                         年齡層,
-                        SUM(信用卡金額) AS 信用卡交易總金額
+                        SUM(信用卡金額) AS 信用卡交易總金額,
+                        RANK() OVER (PARTITION BY 年 ORDER BY SUM(信用卡金額) DESC) AS rnk
                     FROM
                         age
                     GROUP BY
@@ -413,32 +386,35 @@ class Window(tk.Tk):
                     年齡層,
                     信用卡交易總金額
                 FROM
-                    ranked_data;
+                    ranked_data
+                WHERE
+                    rnk <= 8;
             """
             df = pd.read_sql_query(sql, conn)
             ax.pie(
                 df["信用卡交易總金額"],
                 labels=df["年齡層"],
                 startangle=90,
-                textprops={"fontsize": 1},
+                textprops={"fontsize": 10},
             )
-            ax.set_title(f"信用卡交易總金額 by 年齡層")
+            ax.set_title(f"各{selected_option}信用卡交易金額分布")
 
         # Create the canvas for the chart if it doesn't exist
         if not hasattr(self, "canvas_pie_chart"):
             self.canvas_pie_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame1)
             canvas_widget = self.canvas_pie_chart.get_tk_widget()
-            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=10, pady=10)
+            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=5, pady=5)
         else:
             # Update the content of the existing canvas
             self.canvas_pie_chart.get_tk_widget().destroy()
             self.canvas_pie_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame1)
             canvas_widget = self.canvas_pie_chart.get_tk_widget()
-            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=10, pady=10)
+            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=5, pady=5)
 
         # Show the chart
         self.canvas_pie_chart.draw()
 
+    # ------------長條圖------------#
     def show_bar_charts(self):
         selected_option = self.data_var.get()
         table = self.data_mapping.get(selected_option)
@@ -446,82 +422,80 @@ class Window(tk.Tk):
 
         # Initialize fig and ax
         fig, ax = plt.subplots(figsize=(5, 3))
+        fig.subplots_adjust(bottom=0.1, top=0.9)
 
-        if (
-            selected_option == "教育程度類別"
-            or selected_option == "職業類別"
-            or selected_option == "年收入"
-        ):
+        if selected_option != "年齡層":
             # Your SQL query
-            sql = f"SELECT {selected_option}, SUM(信用卡金額) AS 信用卡交易總金額 FROM {table} GROUP BY {selected_option}"
-
+            sql = f"SELECT 產業別,{selected_option}, SUM(信用卡金額) AS 信用卡交易總金額 FROM {table} GROUP BY 產業別,{selected_option}"
             df = pd.read_sql_query(sql, conn)
-            ax.bar(
-                df[selected_option],
-                df["信用卡交易總金額"],
-                color=["blue", "orange", "green", "red", "purple"],  # 設定顏色，可以根據需要自行調整
+            df_pivot = df.pivot(
+                index="產業別", columns=f"{selected_option}", values="信用卡交易總金額"
             )
-            ax.set_title(f"信用卡交易總金額 by {selected_option}")
-            ax.set_xlabel(selected_option)
-            ax.set_ylabel("信用卡交易總金額")
-
-        elif selected_option == "兩性":
-            sql_male = """
-                SELECT SUM(信用卡金額) AS 信用卡交易總金額
-                FROM sex
-                WHERE 性別 = '男性'
-            """
-
-            sql_female = """
-                SELECT SUM(信用卡金額) AS 信用卡交易總金額
-                FROM sex
-                WHERE 性別 = '女性'
-            """
-
-            df_male = pd.read_sql_query(sql_male, conn)
-            df_female = pd.read_sql_query(sql_female, conn)
-
-            labels = ["男性", "女性"]
-            values = [df_male["信用卡交易總金額"].values[0], df_female["信用卡交易總金額"].values[0]]
-            ax.bar(labels, values, color=["blue", "orange"])
-            ax.set_title("男女信用卡交易金額分佈")
-            ax.set_xlabel("性別")
-            ax.set_ylabel("信用卡交易總金額")
+            if selected_option != "性別":
+                df_pivot.plot(
+                    kind="bar", stacked=True, ax=ax, cmap="viridis", legend=False
+                )
+            else:
+                df_pivot.plot(
+                    kind="bar",
+                    stacked=True,
+                    ax=ax,
+                    cmap="viridis",
+                    legend=False,
+                    color=["#1f77b4", "#ff7f0e"],
+                )
 
         elif selected_option == "年齡層":
             sql = """
                 WITH ranked_data AS (
                     SELECT
                         年齡層,
-                        SUM(信用卡金額) AS 信用卡交易總金額
+                        產業別,
+                        SUM(信用卡金額) AS 信用卡交易總金額,
+                        RANK() OVER (PARTITION BY 產業別 ORDER BY SUM(信用卡金額) DESC) AS rnk
                     FROM
                         age
                     GROUP BY
-                        年齡層
+                        年齡層,
+                        產業別
                 )
                 SELECT
                     年齡層,
+                    產業別,
                     信用卡交易總金額
                 FROM
-                    ranked_data;
+                    ranked_data
+                WHERE
+                    rnk <= 8;
             """
+
             df = pd.read_sql_query(sql, conn)
-            ax.bar(df["年齡層"], df["信用卡交易總金額"], color="blue")  # 設定顏色，可以根據需要自行調整
-            ax.set_title(f"信用卡交易總金額 by 年齡層")
-            ax.set_xlabel("年齡層")
-            ax.set_ylabel("信用卡交易總金額")
+            df_pivot = df.pivot(
+                index="產業別", columns=f"{selected_option}", values="信用卡交易總金額"
+            )
+            df_pivot.plot(kind="bar", stacked=True, ax=ax, cmap="viridis", legend=False)
+
+        if selected_option == "教育程度類別":
+            ax.set_title(f"各教育程度與產業別信用卡交易金額占比", pad=3)
+        else:
+            ax.set_title(f"各{selected_option}與產業別信用卡交易金額占比", pad=3)
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=0)
+        ax.set_ylabel("信用卡交易總金額")
+        # 設置 x 和 y 軸標籤的字體大小
+        ax.tick_params(axis="x", labelsize=10)
+        ax.tick_params(axis="y", labelsize=10)
 
         # Create the canvas for the chart if it doesn't exist
         if not hasattr(self, "canvas_bar_chart"):
             self.canvas_bar_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame2)
             canvas_widget = self.canvas_bar_chart.get_tk_widget()
-            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=10, pady=10)
+            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=5, pady=5)
         else:
             # Update the content of the existing canvas
             self.canvas_bar_chart.get_tk_widget().destroy()
             self.canvas_bar_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame2)
             canvas_widget = self.canvas_bar_chart.get_tk_widget()
-            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=10, pady=10)
+            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1, padx=5, pady=5)
 
         # Show the chart
         self.canvas_bar_chart.draw()
@@ -532,24 +506,24 @@ class Window(tk.Tk):
         data_list = data_dict["values"]
         if data_list:
             index = self.treeview.index(selected_item)
-            # 將欄位名稱和資料一起傳遞給 ShowDetail
             ShowDetail(self, self.treeview["columns"], data_list, title="資訊")
 
     def display_data(self, data):
-        self.treeview.delete(*self.treeview.get_children())  # 清空 Treeview
+        self.treeview.delete(*self.treeview.get_children())
 
         if not data.empty:
             columns = list(data.columns)
             self.treeview["columns"] = columns
             for col in columns:
                 self.treeview.heading(col, text=col, anchor="w")
-                self.treeview.column(col, anchor="w", width=100)  # 設定欄位寬度，可以自行調整
+                self.treeview.column(col, anchor="w", width=100)
 
             for index, row in data.iterrows():
                 values = [row[col] for col in columns]
                 self.treeview.insert("", "end", values=values)
 
 
+# ------------Dialog------------#
 class ShowDetail(Dialog):
     def __init__(self, parent, columns, data, **kwargs):
         self.columns = columns
