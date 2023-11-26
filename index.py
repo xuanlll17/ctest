@@ -318,22 +318,53 @@ class Window(tk.Tk):
         conn = sqlite3.connect("creditcard.db")
 
         # Initialize fig and ax
-        fig, ax = plt.subplots(figsize=(3.66, 3))
+        fig, ax = plt.subplots(figsize=(3.85, 3))
         fig.subplots_adjust(bottom=0.1, top=0.9)
         if (
             selected_option == "教育程度類別"
             or selected_option == "職業類別"
             or selected_option == "年收入"
         ):
-            # Your SQL query
-            sql = f"SELECT {selected_option}, SUM(信用卡金額) AS 信用卡交易總金額 FROM {table} GROUP BY {selected_option}"
-
-            df = pd.read_sql_query(sql, conn)
-            ax.pie(df["信用卡交易總金額"], labels=df[selected_option], startangle=90)
             if selected_option == "教育程度類別":
+                sql = f"SELECT {selected_option}, SUM(信用卡金額) AS 信用卡交易總金額 FROM {table} GROUP BY {selected_option}"
+                df = pd.read_sql_query(sql, conn)
                 ax.set_title(f"各教育程度信用卡交易金額分布")
+                ax.pie(df["信用卡交易總金額"], labels=df[selected_option])
             else:
+                if selected_option == "職業類別":
+                    sql = """
+                        SELECT
+                            CASE
+                                WHEN 職業類別 = '其他公共行政類' THEN '公共行政'
+                                WHEN 職業類別 = '專業及技術服務類' THEN '專業技術'
+                                WHEN 職業類別 = '工商及服務類' THEN '工商服務'
+                                WHEN 職業類別 = '教育類' THEN '教育'
+                                WHEN 職業類別 IN ('軍警人員一', '軍警人員二') THEN '軍警'
+                                ELSE 職業類別
+                            END AS 職業類別,
+                            SUM(信用卡金額) AS 信用卡交易總金額
+                        FROM
+                            job
+                        GROUP BY
+                            CASE
+                                WHEN 職業類別 = '軍警人員一' THEN '軍警'
+                                WHEN 職業類別 = '軍警人員二' THEN '軍警'
+                                ELSE 職業類別
+                            END;
+                        """
+                    df = pd.read_sql_query(sql, conn)
+                else:
+                    sql = f"SELECT {selected_option}, SUM(信用卡金額) AS 信用卡交易總金額 FROM {table} GROUP BY {selected_option}"
+                    df = pd.read_sql_query(sql, conn)
                 ax.set_title(f"各{selected_option}信用卡交易金額分布")
+                ax.pie(
+                    df["信用卡交易總金額"],
+                    labels=df[selected_option],
+                    startangle=10,
+                    textprops={
+                        "fontsize": 9.5,
+                    },
+                )
 
         elif selected_option == "性別":
             sql_male = """
@@ -386,7 +417,6 @@ class Window(tk.Tk):
             ax.pie(
                 df["信用卡交易總金額"],
                 labels=df["年齡層"],
-                startangle=90,
                 textprops={"fontsize": 10},
             )
             ax.set_title(f"各{selected_option}信用卡交易金額分布")
