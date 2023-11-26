@@ -256,16 +256,8 @@ class Window(tk.Tk):
             df_male = pd.read_sql_query(sql_male, conn)
             df_female = pd.read_sql_query(sql_female, conn)
 
-            ax.plot(
-                df_male["年"], df_male["信用卡交易總金額"], marker="o", label="男性", color="blue"
-            )
-            ax.plot(
-                df_female["年"],
-                df_female["信用卡交易總金額"],
-                marker="o",
-                label="女性",
-                color="orange",
-            )
+            ax.plot(df_male["年"], df_male["信用卡交易總金額"], marker="o", label="男性")
+            ax.plot(df_female["年"], df_female["信用卡交易總金額"], marker="o", label="女性")
 
             ax.set_title("男女信用卡交易金額趨勢")
             ax.set_xlabel("年份")
@@ -440,7 +432,6 @@ class Window(tk.Tk):
                     kind="bar",
                     stacked=True,
                     ax=ax,
-                    cmap="viridis",
                     legend=False,
                     color=["#1f77b4", "#ff7f0e"],
                 )
@@ -555,7 +546,19 @@ class ShowDetail(Dialog):
 
 
 def main():
+    def on_closing():
+        print("window關閉")
+        if hasattr(window, "canvas_line_chart"):
+            window.canvas_line_chart.get_tk_widget().destroy()
+        if hasattr(window, "canvas_pie_chart"):
+            window.canvas_pie_chart.get_tk_widget().destroy()
+        if hasattr(window, "canvas_bar_chart"):
+            window.canvas_bar_chart.get_tk_widget().destroy()
+        plt.close("all")
+        window.destroy()
+
     window = Window()
+    window.protocol("WM_DELETE_WINDOW", on_closing)
     window.resizable(width=False, height=False)
     window.mainloop()
 
