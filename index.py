@@ -605,8 +605,8 @@ def main():
         plt.close("all")
         window.destroy()
 
-    window = Window()
     check_database()
+    window = Window()
     window.protocol("WM_DELETE_WINDOW", on_closing)  #關閉視窗時會執行on_closing
     window.resizable(width=False, height=False)  #固定視窗大小,不能更改
     window.mainloop()
