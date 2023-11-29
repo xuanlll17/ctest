@@ -8,6 +8,7 @@ from tkinter.simpledialog import Dialog
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import data
+import os
 
 
 class Window(tk.Tk):
@@ -523,11 +524,12 @@ class Window(tk.Tk):
         self.canvas_bar_chart.draw()
 
     def selectedItem(self, event):
-        selected_item = self.treeview.focus()
-        data_dict = self.treeview.item(selected_item)
-        data_list = data_dict["values"]
-        if data_list:
-            index = self.treeview.index(selected_item)
+        selected_item = self.treeview.focus()  #取得被選中的資料
+        data_dict = self.treeview.item(selected_item)  #取得選取資料的內容,並儲存在data_dict中
+        data_list = data_dict["values"]  #取出data_dict["values"]中的資料
+        if data_list:  #當data_list有值,就執行以下程式碼
+            #index = self.treeview.index(selected_item)
+            #將值傳給ShowDetail,ShowDetail(parent, columns, data)[必須], title[選擇]
             ShowDetail(self, self.treeview["columns"], data_list, title="資訊")
 
     def display_data(self, data):
@@ -543,10 +545,16 @@ class Window(tk.Tk):
                 #設定每一欄位的屬性,這裡的width=100(沒用)
                 self.treeview.column(col, anchor="w", width=100)
 
-            #將資料內容寫入treeview
-            for index, row in data.iterrows():
-                values = [row[col] for col in columns]
+            #將dataframe(data)內容轉換為list
+            data_list = data.values.tolist()
+            #將list的內容寫入treeview
+            for values in data_list:
                 self.treeview.insert("", "end", values=values)
+
+            #將資料內容寫入treeview
+            #for index, row in data.iterrows():
+                #values = [row[col] for col in columns]
+                #self.treeview.insert("", "end", values=values)
 
 
 # ------------Dialog------------#
@@ -580,7 +588,10 @@ class ShowDetail(Dialog):
 
 
 def main():
-    #data.csv_to_database()
+    def check_database():
+        path = "creditcard.db"  #設定資料庫路徑
+        if not os.path.exists(path):  #如果沒有建立資料庫,就執行以下程式
+            data.csv_to_database()
     def on_closing():
         print("window關閉")
         #將canvas關閉
@@ -595,6 +606,7 @@ def main():
         window.destroy()
 
     window = Window()
+    check_database()
     window.protocol("WM_DELETE_WINDOW", on_closing)  #關閉視窗時會執行on_closing
     window.resizable(width=False, height=False)  #固定視窗大小,不能更改
     window.mainloop()

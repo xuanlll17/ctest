@@ -193,3 +193,5 @@ def csv_to_database() -> None:
         df.to_sql(item, conn, if_exists="replace", index=False)  #寫入資料庫中,if_exists="replace"->若table已經存在將其替換, index=False->不將dataframe的索引值寫入
 
     conn.close()
+
+
