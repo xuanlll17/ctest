@@ -588,10 +588,8 @@ class ShowDetail(Dialog):
 
 
 def main():
-    def check_database():
-        path = "creditcard.db"  #設定資料庫路徑
-        if not os.path.exists(path):  #如果沒有建立資料庫,就執行以下程式
-            data.csv_to_database()
+  
+    data.csv_to_database()
     def on_closing():
         print("window關閉")
         #將canvas關閉
@@ -605,7 +603,7 @@ def main():
         plt.close("all")
         window.destroy()
 
-    check_database()
+
     window = Window()
     window.protocol("WM_DELETE_WINDOW", on_closing)  #關閉視窗時會執行on_closing
     window.resizable(width=False, height=False)  #固定視窗大小,不能更改
