@@ -82,7 +82,7 @@ class Window(tk.Tk):
                 "ALL",
             ],
         )
-        self.area.grid(row=1, column=1, padx=10, pady=10)
+        self.area.grid(row=1, column=1, padx=1, pady=10)
 
         self.industry_var = tk.StringVar()
         self.industry_var.set("請選擇產業別")
@@ -91,7 +91,7 @@ class Window(tk.Tk):
             textvariable=self.industry_var,
             values=["食", "衣", "住", "行", "文教康樂", "百貨", "ALL"],
         )
-        self.industry.grid(row=2, column=1, padx=10, pady=10)
+        self.industry.grid(row=2, column=1, padx=1, pady=10)
 
         self.age_var = tk.StringVar()
         self.age_var.set("請選擇年齡層")
@@ -100,7 +100,7 @@ class Window(tk.Tk):
             textvariable=self.age_var,
             values=["未滿20歲", "20(含)-25歲", "25(含)-30歲", "30(含)-35歲", "35(含)-40歲", "40(含)-45歲", "45(含)-50歲", "50(含)-55歲", "55(含)-60歲", "60(含)-65歲", "65(含)-70歲", "70(含)-75歲", "75(含)-80歲", "80(含)歲以上", "ALL"],
         )
-        self.age.grid(row=3, column=1, padx=10, pady=10)
+        self.age.grid(row=3, column=1, padx=1, pady=10)
 
         # state="active"->按鈕可以點擊,command按鈕被點擊時執行self.load_data
         self.botton = tk.Button(
@@ -114,13 +114,13 @@ class Window(tk.Tk):
         self.bottomFrame1 = ttk.Labelframe(self.charFrame, text="圓餅圖")
         self.bottomFrame1.grid(row=1, column=1, padx=(3, 5), pady=(0, 5), sticky="nsew")
 
-        self.bottomFrame2 = ttk.Labelframe(self.charFrame, text="熱力圖")
+        self.bottomFrame2 = ttk.Labelframe(self.charFrame, text="地區")
         self.bottomFrame2.grid(row=1, column=2, padx=(0, 5), pady=(0, 5), sticky="nsew")
 
         self.bottomFrame3 = ttk.Labelframe(self.charFrame, text="折線圖")
         self.bottomFrame3.grid(row=1, column=3, padx=(0, 3), pady=(0, 5), sticky="nsew")
 
-        self.bottomFrame4 = ttk.Labelframe(self.charFrame, text="地區")
+        self.bottomFrame4 = ttk.Labelframe(self.charFrame, text="熱力圖")
         self.bottomFrame4.grid(row=2, column=1, padx=(0, 3), pady=(0, 5), sticky="nsew")
 
         self.bottomFrame5 = ttk.Labelframe(self.charFrame, text="產業別")
@@ -249,13 +249,13 @@ class Window(tk.Tk):
 
         # ------create canvas------#
         if not hasattr(self, "canvas_heatmap_chart"):
-            self.canvas_heatmap_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame2)
+            self.canvas_heatmap_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame4)
             canvas_widget = self.canvas_heatmap_chart.get_tk_widget()
             canvas_widget.grid(row=1, column=2, padx=(0, 5), pady=(0, 5), sticky="nsew")
         # ------update canvas content------#
         else:
             self.canvas_heatmap_chart.get_tk_widget().destroy()
-            self.canvas_heatmap_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame2)
+            self.canvas_heatmap_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame4)
             canvas_widget = self.canvas_heatmap_chart.get_tk_widget()
             canvas_widget.grid(row=1, column=2, padx=(0, 5), pady=(0, 5), sticky="nsew")
 
@@ -300,7 +300,7 @@ class Window(tk.Tk):
                 """
         df = pd.read_sql_query(sql, conn)
         #df["平均交易金額"] = df["信用卡交易金額"] / df["信用卡交易筆數"]
-        fig, ax = plt.subplots(figsize=(4.5, 3))
+        fig, ax = plt.subplots(figsize=(5, 3))
 
         sns.barplot(x="地區", y="信用卡交易金額", data=df, ax=ax)
         ax.set_title("不同地區的信用卡交易金額")
@@ -309,6 +309,10 @@ class Window(tk.Tk):
         ax2 = ax.twinx()
         sns.lineplot(x="地區", y="平均交易金額", data=df, color="red", marker="o", ax=ax2)
         ax2.set_ylabel("平均交易金額")
+
+        ax.tick_params(axis='y', labelsize=9)
+        ax2.tick_params(axis='y', labelsize=6.5)
+
         # Set an empty string as xlabel
         ax.set_xlabel("")
         ax2.set_xlabel("")
@@ -316,13 +320,13 @@ class Window(tk.Tk):
 
         # ------create canvas------#
         if not hasattr(self, "canvas_area_chart"):
-            self.canvas_area_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame4)
+            self.canvas_area_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame2)
             canvas_widget = self.canvas_area_chart.get_tk_widget()
             canvas_widget.grid(row=2, column=1, padx=(0, 3), pady=(0, 5), sticky="nsew")
         # ------update canvas content------#
         else:
             self.canvas_area_chart.get_tk_widget().destroy()
-            self.canvas_area_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame4)
+            self.canvas_area_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame2)
             canvas_widget = self.canvas_area_chart.get_tk_widget()
             canvas_widget.grid(row=2, column=1, padx=(0, 3), pady=(0, 5), sticky="nsew")
 
@@ -360,7 +364,7 @@ class Window(tk.Tk):
         ax2.set_ylabel("平均交易金額")
 
     
-        ax.tick_params(axis='y', labelsize=6.5)
+        ax.tick_params(axis='y', labelsize=8)
         ax2.tick_params(axis='y', labelsize=6.5)
 
         # Set an empty string as xlabel
@@ -432,7 +436,7 @@ class Window(tk.Tk):
 
         # Set x-axis font size
         ax.tick_params(axis='x', labelsize=8.5)
-        ax.tick_params(axis='y', labelsize=6.5)
+        ax.tick_params(axis='y', labelsize=8)
         ax2.tick_params(axis='y', labelsize=6.5)
 
         # Set an empty string as xlabel
