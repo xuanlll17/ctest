@@ -33,17 +33,12 @@ class Window(tk.Tk):
         # self.dataLabel = ttk.Label(topFrame, text="資料類別:").grid(
         # row=0, column=0, padx=(1, 0), pady=(20, 10), sticky="w"
         # )
-        self.yearLabel = ttk.Label(topFrame, text="年份:").grid(
+
+        self.areaLabel = ttk.Label(topFrame, text="地區:").grid(
             row=1, column=0, padx=(1, 0), pady=10, sticky="w"
         )
-        self.monthLabel = ttk.Label(topFrame, text="月份:").grid(
-            row=2, column=0, padx=(1, 0), pady=10, sticky="w"
-        )
-        self.areaLabel = ttk.Label(topFrame, text="地區:").grid(
-            row=3, column=0, padx=(1, 0), pady=10, sticky="w"
-        )
         self.industryLabel = ttk.Label(topFrame, text="產業別:").grid(
-            row=4, column=0, padx=(1, 0), pady=10, sticky="w"
+            row=2, column=0, padx=(1, 0), pady=10, sticky="w"
         )
         # ------StringVar------#
         # self.data = ttk.Label(
@@ -51,48 +46,6 @@ class Window(tk.Tk):
         # text="年齡層",
         # ).grid(row=0, column=1, padx=10, pady=(20, 10))
 
-        self.year_var = tk.StringVar()
-        self.year_var.set("請選擇年份")
-        self.year = ttk.Combobox(
-            topFrame,
-            textvariable=self.year_var,
-            values=[
-                "2014",
-                "2015",
-                "2016",
-                "2017",
-                "2018",
-                "2019",
-                "2020",
-                "2021",
-                "2022",
-                "2023",
-            ],
-        )
-        self.year.grid(row=1, column=1, padx=10, pady=10)
-
-        self.month_var = tk.StringVar()
-        self.month_var.set("請選擇月份")
-        self.month = ttk.Combobox(
-            topFrame,
-            textvariable=self.month_var,
-            values=[
-                "1",
-                "2",
-                "3",
-                "4",
-                "5",
-                "6",
-                "7",
-                "8",
-                "9",
-                "10",
-                "11",
-                "12",
-                "ALL",
-            ],
-        )
-        self.month.grid(row=2, column=1, padx=10, pady=10)
 
         self.area_var = tk.StringVar()
         self.area_var.set("請選擇地區")
@@ -125,7 +78,7 @@ class Window(tk.Tk):
                 "ALL",
             ],
         )
-        self.area.grid(row=3, column=1, padx=10, pady=10)
+        self.area.grid(row=1, column=1, padx=10, pady=10)
 
         self.industry_var = tk.StringVar()
         self.industry_var.set("請選擇產業別")
@@ -134,7 +87,7 @@ class Window(tk.Tk):
             textvariable=self.industry_var,
             values=["食", "衣", "住", "行", "文教康樂", "百貨", "其他", "ALL"],
         )
-        self.industry.grid(row=4, column=1, padx=10, pady=10)
+        self.industry.grid(row=2, column=1, padx=10, pady=10)
 
         # state="active"->按鈕可以點擊,command按鈕被點擊時執行self.load_data
         self.botton = tk.Button(
@@ -325,11 +278,26 @@ class Window(tk.Tk):
         self.canvas_bar_chart.draw()
 
     def show_area_charts(self):
-        df = pd.read_csv("./age_trans.csv")
-        df["平均交易金額"] = df["信用卡交易金額[新台幣]"] / df["信用卡交易筆數"]
+        conn = sqlite3.connect("creditcard.db")
+        sql = """
+            SELECT
+                地區,
+                信用卡交易筆數,
+                SUM(信用卡金額) AS 信用卡交易金額,
+                AVG(信用卡金額) AS 平均交易金額
+            FROM
+                age
+            GROUP BY
+                地區
+            ORDER BY
+                信用卡交易金額 DESC
+            LIMIT 8;
+        """
+        df = pd.read_sql_query(sql, conn)
+        # df["平均交易金額"] = df["信用卡交易金額[新台幣]"] / df["信用卡交易筆數"]
         fig, ax = plt.subplots(figsize=(4.5, 3))
 
-        sns.barplot(x="地區", y="信用卡交易金額[新台幣]", data=df, ax=ax)
+        sns.barplot(x="地區", y="信用卡交易金額", data=df, ax=ax)
         ax.set_title("不同地區的信用卡交易金額")
         ax.set_xlabel("地區")
         ax.set_ylabel("信用卡交易金額")
@@ -357,9 +325,9 @@ class Window(tk.Tk):
         sql = """
         SELECT
             產業別,
-            信用卡交易
+            信用卡交易筆數,
             SUM(信用卡金額) AS 信用卡交易金額,
-            AVG(信用卡金額) AS 平均交易金額,
+            AVG(信用卡金額) AS 平均交易金額
         FROM
             age
         WHERE
@@ -368,7 +336,7 @@ class Window(tk.Tk):
             產業別;
     """
         df = pd.read_sql_query(sql, conn)
-        df["平均交易金額"] = df["信用卡交易金額"] / df["信用卡交易筆數"]
+        # df["平均交易金額"] = df["信用卡交易金額"] / df["信用卡交易筆數"]
         fig, ax = plt.subplots(figsize=(5, 3))
 
         sns.barplot(x="產業別", y="信用卡交易金額", data=df, ax=ax)
@@ -403,19 +371,19 @@ class Window(tk.Tk):
         sql = """
         SELECT
             年齡層,
+            信用卡交易筆數,
             SUM(信用卡金額) AS 信用卡交易金額,
-            AVG(信用卡金額) AS 平均交易金額,
-            COUNT(*) AS 信用卡交易筆數
+            AVG(信用卡金額) AS 平均交易金額
         FROM
             age
         GROUP BY
             年齡層;
     """
         df = pd.read_sql_query(sql, conn)
-        df["平均交易金額"] = df["信用卡交易金額"] / df["信用卡交易筆數"]
+        # df["平均交易金額"] = df["信用卡交易金額"] / df["信用卡交易筆數"]
         fig, ax = plt.subplots(figsize=(4.5, 3))
 
-        sns.barplot(x="年齡層", y="信用卡交易金額[新台幣]", data=df, ax=ax)
+        sns.barplot(x="年齡層", y="信用卡交易金額", data=df, ax=ax)
         ax.set_title("不同年齡層的信用卡交易金額")
         ax.set_xlabel("年齡層")
         ax.set_ylabel("信用卡交易金額")
