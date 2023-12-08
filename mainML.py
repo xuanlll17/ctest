@@ -1,0 +1,465 @@
+import tkinter as tk
+from tkinter import ttk
+import ttkbootstrap as ttkb
+from ttkbootstrap import Style
+import pandas as pd
+import sqlite3
+from tkinter.simpledialog import Dialog
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import data
+import os
+import seaborn as sns
+
+
+class Window(tk.Tk):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.title("信用卡消費樣態")
+        self.conn = sqlite3.connect("creditcard.db")
+        plt.rcParams["font.family"] = "Microsoft JhengHei"
+        style = Style("lumen")
+
+        # ------------介面-----------#
+        mainFrame = tk.Frame(self, relief=tk.GROOVE, borderwidth=1)
+        tk.Label(mainFrame, text="信用卡消費樣態", font=("arial", 20), fg="#333333").pack(
+            padx=10, pady=10
+        )
+        mainFrame.pack(padx=5, pady=10, fill="both")
+
+        # ------------搜尋------------#
+        topFrame = ttk.Labelframe(self, text="搜尋")
+        # ------Label------#
+        # self.dataLabel = ttk.Label(topFrame, text="資料類別:").grid(
+        # row=0, column=0, padx=(1, 0), pady=(20, 10), sticky="w"
+        # )
+        self.yearLabel = ttk.Label(topFrame, text="年份:").grid(
+            row=1, column=0, padx=(1, 0), pady=10, sticky="w"
+        )
+        self.monthLabel = ttk.Label(topFrame, text="月份:").grid(
+            row=2, column=0, padx=(1, 0), pady=10, sticky="w"
+        )
+        self.areaLabel = ttk.Label(topFrame, text="地區:").grid(
+            row=3, column=0, padx=(1, 0), pady=10, sticky="w"
+        )
+        self.industryLabel = ttk.Label(topFrame, text="產業別:").grid(
+            row=4, column=0, padx=(1, 0), pady=10, sticky="w"
+        )
+        # ------StringVar------#
+        # self.data = ttk.Label(
+        # topFrame,
+        # text="年齡層",
+        # ).grid(row=0, column=1, padx=10, pady=(20, 10))
+
+        self.year_var = tk.StringVar()
+        self.year_var.set("請選擇年份")
+        self.year = ttk.Combobox(
+            topFrame,
+            textvariable=self.year_var,
+            values=[
+                "2014",
+                "2015",
+                "2016",
+                "2017",
+                "2018",
+                "2019",
+                "2020",
+                "2021",
+                "2022",
+                "2023",
+            ],
+        )
+        self.year.grid(row=1, column=1, padx=10, pady=10)
+
+        self.month_var = tk.StringVar()
+        self.month_var.set("請選擇月份")
+        self.month = ttk.Combobox(
+            topFrame,
+            textvariable=self.month_var,
+            values=[
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "11",
+                "12",
+                "ALL",
+            ],
+        )
+        self.month.grid(row=2, column=1, padx=10, pady=10)
+
+        self.area_var = tk.StringVar()
+        self.area_var.set("請選擇地區")
+        self.area = ttk.Combobox(
+            topFrame,
+            textvariable=self.area_var,
+            values=[
+                "臺北市",
+                "高雄市",
+                "新北市",
+                "臺中市",
+                "臺南市",
+                "桃園市",
+                "宜蘭縣",
+                "新竹縣",
+                "苗栗縣",
+                "彰化縣",
+                "南投縣",
+                "雲林縣",
+                "嘉義縣",
+                "嘉義市",
+                "屏東縣",
+                "臺東縣",
+                "花蓮縣",
+                "澎湖縣",
+                "基隆市",
+                "新竹市",
+                "金門縣",
+                "連江縣",
+                "ALL",
+            ],
+        )
+        self.area.grid(row=3, column=1, padx=10, pady=10)
+
+        self.industry_var = tk.StringVar()
+        self.industry_var.set("請選擇產業別")
+        self.industry = ttk.Combobox(
+            topFrame,
+            textvariable=self.industry_var,
+            values=["食", "衣", "住", "行", "文教康樂", "百貨", "其他", "ALL"],
+        )
+        self.industry.grid(row=4, column=1, padx=10, pady=10)
+
+        # state="active"->按鈕可以點擊,command按鈕被點擊時執行self.load_data
+        self.botton = tk.Button(
+            topFrame, text="搜尋", state="active", command=self.load_data, width=30
+        ).grid(row=5, column=0, padx=10, pady=20, columnspan=2)
+        topFrame.pack(side=tk.LEFT, padx=(5, 5), pady=(0, 5), fill="y")
+
+        # ------------圖表-------------#
+        self.charFrame = ttk.LabelFrame(self)
+        self.charFrame.pack(side=tk.LEFT, expand=True, fill="both")
+        self.bottomFrame1 = ttk.Labelframe(self.charFrame, text="圓餅圖")
+        self.bottomFrame1.grid(row=1, column=1, padx=(3, 5), pady=(0, 5), sticky="nsew")
+
+        self.bottomFrame2 = ttk.Labelframe(self.charFrame, text="長條圖")
+        self.bottomFrame2.grid(row=1, column=2, padx=(0, 5), pady=(0, 5), sticky="nsew")
+
+        self.bottomFrame3 = ttk.Labelframe(self.charFrame, text="折線圖")
+        self.bottomFrame3.grid(row=1, column=3, padx=(0, 3), pady=(0, 5), sticky="nsew")
+
+        self.bottomFrame4 = ttk.Labelframe(self.charFrame, text="地區")
+        self.bottomFrame4.grid(row=2, column=1, padx=(0, 3), pady=(0, 5), sticky="nsew")
+
+        self.bottomFrame5 = ttk.Labelframe(self.charFrame, text="產業別")
+        self.bottomFrame5.grid(row=2, column=2, padx=(0, 3), pady=(0, 5), sticky="nsew")
+
+        self.bottomFrame6 = ttk.Labelframe(self.charFrame, text="年齡層")
+        self.bottomFrame6.grid(row=2, column=3, padx=(0, 3), pady=(0, 5), sticky="nsew")
+
+    def load_data(self):
+        self.show_line_charts()
+        self.show_pie_charts()
+        self.show_bar_charts()
+        self.show_area_charts()
+        self.show_industry_charts()
+        self.show_age_charts()
+
+    # ------------折線圖------------#
+    def show_line_charts(self):
+        conn = sqlite3.connect("creditcard.db")
+
+        fig, ax = plt.subplots(figsize=(5, 3))
+        fig.subplots_adjust(bottom=0.1, top=0.9)
+
+        sql = """
+            WITH ranked_data AS (
+                SELECT
+                    年,
+                    年齡層,
+                    SUM(信用卡金額) AS 信用卡交易總金額,
+                    RANK() OVER (PARTITION BY 年 ORDER BY SUM(信用卡金額) DESC) AS rnk
+                FROM
+                    age
+                GROUP BY
+                    年,
+                    年齡層
+            )
+            SELECT
+                年,
+                年齡層,
+                信用卡交易總金額
+            FROM
+                ranked_data
+            WHERE
+                rnk <= 8;
+        """
+        df = pd.read_sql_query(sql, conn)
+        pivot_df = df.pivot(index="年", columns=f"年齡層", values="信用卡交易總金額")
+        pivot_df.plot(kind="line", marker="o", linestyle="-", ax=ax)
+        ax.set_title(f"各年齡層信用卡交易金額趨勢")
+        ax.set_ylabel("信用卡交易總金額")
+        ax.set_xticks(df["年"])
+        ax.legend().set_visible(False)
+
+        # ------create canvas------#
+        if not hasattr(self, "canvas_line_chart"):
+            self.canvas_line_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame3)
+            canvas_widget = self.canvas_line_chart.get_tk_widget()
+            canvas_widget.grid(row=1, column=3, padx=(0, 3), pady=(0, 5), sticky="nsew")
+        else:
+            # ------update canvas content------#
+            self.canvas_line_chart.get_tk_widget().destroy()
+            self.canvas_line_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame3)
+            canvas_widget = self.canvas_line_chart.get_tk_widget()
+            canvas_widget.grid(row=1, column=3, padx=(0, 3), pady=(0, 5), sticky="nsew")
+
+        self.canvas_line_chart.draw()
+
+    # ------------圓餅圖------------#
+    def show_pie_charts(self):
+        conn = sqlite3.connect("creditcard.db")
+
+        fig, ax = plt.subplots(figsize=(3.85, 3))
+        fig.subplots_adjust(bottom=0.1, top=0.9)
+
+        sql = """
+            WITH ranked_data AS (
+                SELECT
+                    年齡層,
+                    SUM(信用卡金額) AS 信用卡交易總金額,
+                    RANK() OVER (PARTITION BY 年 ORDER BY SUM(信用卡金額) DESC) AS rnk
+                FROM
+                    age
+                GROUP BY
+                    年齡層
+            )
+            SELECT
+                年齡層,
+                信用卡交易總金額
+            FROM
+                ranked_data
+            WHERE
+                rnk <= 8;
+        """
+        df = pd.read_sql_query(sql, conn)
+        ax.pie(
+            df["信用卡交易總金額"],
+            labels=df["年齡層"],
+            textprops={"fontsize": 10},
+        )
+        ax.set_title(f"各年齡層信用卡交易金額分布")
+
+        # ------create canvas------#
+        if not hasattr(self, "canvas_pie_chart"):
+            self.canvas_pie_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame1)
+            canvas_widget = self.canvas_pie_chart.get_tk_widget()
+            canvas_widget.grid(row=1, column=1, padx=(3, 5), pady=(0, 5), sticky="nsew")
+        # ------update canvas content------#
+        else:
+            self.canvas_pie_chart.get_tk_widget().destroy()
+            self.canvas_pie_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame1)
+            canvas_widget = self.canvas_pie_chart.get_tk_widget()
+            canvas_widget.grid(row=1, column=1, padx=(3, 5), pady=(0, 5), sticky="nsew")
+
+        self.canvas_pie_chart.draw()
+
+    # ------------長條圖------------#
+    def show_bar_charts(self):
+        conn = sqlite3.connect("creditcard.db")
+
+        fig, ax = plt.subplots(figsize=(5, 3))
+        fig.subplots_adjust(bottom=0.1, top=0.9)
+
+        sql = """
+            WITH ranked_data AS (
+                SELECT
+                    年齡層,
+                    產業別,
+                    SUM(信用卡金額) AS 信用卡交易總金額,
+                    RANK() OVER (PARTITION BY 產業別 ORDER BY SUM(信用卡金額) DESC) AS rnk
+                FROM
+                    age
+                GROUP BY
+                    年齡層,
+                    產業別
+            )
+            SELECT
+                年齡層,
+                產業別,
+                信用卡交易總金額
+            FROM
+                ranked_data
+            WHERE
+                rnk <= 8;
+        """
+
+        df = pd.read_sql_query(sql, conn)
+        df_pivot = df.pivot(index="產業別", columns=f"年齡層", values="信用卡交易總金額")
+        df_pivot.plot(kind="bar", stacked=True, ax=ax, cmap="viridis", legend=False)
+
+        ax.set_title(f"各年齡層與產業別信用卡交易金額占比", pad=3)
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=0)
+        ax.set_ylabel("信用卡交易總金額")
+        ax.tick_params(axis="x", labelsize=10)
+        ax.tick_params(axis="y", labelsize=10)
+
+        # ------create canvas------#
+        if not hasattr(self, "canvas_bar_chart"):
+            self.canvas_bar_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame2)
+            canvas_widget = self.canvas_bar_chart.get_tk_widget()
+            canvas_widget.grid(row=1, column=2, padx=(0, 5), pady=(0, 5), sticky="nsew")
+        # ------update canvas content------#
+        else:
+            self.canvas_bar_chart.get_tk_widget().destroy()
+            self.canvas_bar_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame2)
+            canvas_widget = self.canvas_bar_chart.get_tk_widget()
+            canvas_widget.grid(row=1, column=2, padx=(0, 5), pady=(0, 5), sticky="nsew")
+
+        self.canvas_bar_chart.draw()
+
+    def show_area_charts(self):
+        df = pd.read_csv("./age_trans.csv")
+        df["平均交易金額"] = df["信用卡交易金額[新台幣]"] / df["信用卡交易筆數"]
+        fig, ax = plt.subplots(figsize=(4.5, 3))
+
+        sns.barplot(x="地區", y="信用卡交易金額[新台幣]", data=df, ax=ax)
+        ax.set_title("不同地區的信用卡交易金額")
+        ax.set_xlabel("地區")
+        ax.set_ylabel("信用卡交易金額")
+
+        ax2 = ax.twinx()
+        sns.lineplot(x="地區", y="平均交易金額", data=df, color="red", marker="o", ax=ax2)
+        ax2.set_ylabel("平均交易金額")
+
+        # ------create canvas------#
+        if not hasattr(self, "canvas_area_chart"):
+            self.canvas_area_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame4)
+            canvas_widget = self.canvas_area_chart.get_tk_widget()
+            canvas_widget.grid(row=2, column=1, padx=(0, 3), pady=(0, 5), sticky="nsew")
+        # ------update canvas content------#
+        else:
+            self.canvas_area_chart.get_tk_widget().destroy()
+            self.canvas_area_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame4)
+            canvas_widget = self.canvas_area_chart.get_tk_widget()
+            canvas_widget.grid(row=2, column=1, padx=(0, 3), pady=(0, 5), sticky="nsew")
+
+        self.canvas_area_chart.draw()
+
+    def show_industry_charts(self):
+        conn = sqlite3.connect("creditcard.db")
+        sql = """
+        SELECT
+            產業別,
+            信用卡交易
+            SUM(信用卡金額) AS 信用卡交易金額,
+            AVG(信用卡金額) AS 平均交易金額,
+        FROM
+            age
+        WHERE
+            產業別 != '其他'
+        GROUP BY
+            產業別;
+    """
+        df = pd.read_sql_query(sql, conn)
+        df["平均交易金額"] = df["信用卡交易金額"] / df["信用卡交易筆數"]
+        fig, ax = plt.subplots(figsize=(5, 3))
+
+        sns.barplot(x="產業別", y="信用卡交易金額", data=df, ax=ax)
+        ax.set_title("不同地區的信用卡交易金額")
+        ax.set_xlabel("產業別")
+        ax.set_ylabel("信用卡交易金額")
+
+        ax2 = ax.twinx()
+        sns.lineplot(x="產業別", y="平均交易金額", data=df, color="red", marker="o", ax=ax2)
+        ax2.set_ylabel("平均交易金額")
+
+        # ------create canvas------#
+        if not hasattr(self, "canvas_industry_chart"):
+            self.canvas_industry_chart = FigureCanvasTkAgg(
+                fig, master=self.bottomFrame5
+            )
+            canvas_widget = self.canvas_industry_chart.get_tk_widget()
+            canvas_widget.grid(row=2, column=1, padx=(0, 3), pady=(0, 5), sticky="nsew")
+        # ------update canvas content------#
+        else:
+            self.canvas_industry_chart.get_tk_widget().destroy()
+            self.canvas_industry_chart = FigureCanvasTkAgg(
+                fig, master=self.bottomFrame5
+            )
+            canvas_widget = self.canvas_industry_chart.get_tk_widget()
+            canvas_widget.grid(row=2, column=1, padx=(0, 3), pady=(0, 5), sticky="nsew")
+
+        self.canvas_industry_chart.draw()
+
+    def show_age_charts(self):
+        conn = sqlite3.connect("creditcard.db")
+        sql = """
+        SELECT
+            年齡層,
+            SUM(信用卡金額) AS 信用卡交易金額,
+            AVG(信用卡金額) AS 平均交易金額,
+            COUNT(*) AS 信用卡交易筆數
+        FROM
+            age
+        GROUP BY
+            年齡層;
+    """
+        df = pd.read_sql_query(sql, conn)
+        df["平均交易金額"] = df["信用卡交易金額"] / df["信用卡交易筆數"]
+        fig, ax = plt.subplots(figsize=(4.5, 3))
+
+        sns.barplot(x="年齡層", y="信用卡交易金額[新台幣]", data=df, ax=ax)
+        ax.set_title("不同年齡層的信用卡交易金額")
+        ax.set_xlabel("年齡層")
+        ax.set_ylabel("信用卡交易金額")
+
+        ax2 = ax.twinx()
+        sns.lineplot(x="年齡層", y="平均交易金額", data=df, color="red", marker="o", ax=ax2)
+        ax2.set_ylabel("平均交易金額")
+
+        # ------create canvas------#
+        if not hasattr(self, "canvas_age_chart"):
+            self.canvas_age_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame6)
+            canvas_widget = self.canvas_age_chart.get_tk_widget()
+            canvas_widget.grid(row=2, column=1, padx=(0, 3), pady=(0, 5), sticky="nsew")
+        # ------update canvas content------#
+        else:
+            self.canvas_age_chart.get_tk_widget().destroy()
+            self.canvas_age_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame6)
+            canvas_widget = self.canvas_age_chart.get_tk_widget()
+            canvas_widget.grid(row=2, column=1, padx=(0, 3), pady=(0, 5), sticky="nsew")
+
+        self.canvas_age_chart.draw()
+
+
+def main():
+    # data.csv_to_database()
+
+    def on_closing():
+        print("window關閉")
+        # 將canvas關閉
+        if hasattr(window, "canvas_line_chart"):
+            window.canvas_line_chart.get_tk_widget().destroy()
+        if hasattr(window, "canvas_pie_chart"):
+            window.canvas_pie_chart.get_tk_widget().destroy()
+        if hasattr(window, "canvas_bar_chart"):
+            window.canvas_bar_chart.get_tk_widget().destroy()
+        # 將所有matplotlib圖表關閉
+        plt.close("all")
+        window.destroy()
+
+    window = Window()
+    window.protocol("WM_DELETE_WINDOW", on_closing)  # 關閉視窗時會執行on_closing
+    window.resizable(width=False, height=False)  # 固定視窗大小,不能更改
+    window.mainloop()
+
+
+if __name__ == "__main__":
+    main()
