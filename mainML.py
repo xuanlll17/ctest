@@ -49,7 +49,6 @@ class Window(tk.Tk):
         # text="年齡層",
         # ).grid(row=0, column=1, padx=10, pady=(20, 10))
 
-
         self.area_var = tk.StringVar()
         self.area_var.set("請選擇地區")
         self.area = ttk.Combobox(
@@ -83,6 +82,7 @@ class Window(tk.Tk):
             ],
         )
         self.area.grid(row=1, column=1, padx=1, pady=10)
+        self.area.bind("<<ComboboxSelected>>", self.load_data)
 
         self.industry_var = tk.StringVar()
         self.industry_var.set("請選擇產業別")
@@ -92,21 +92,39 @@ class Window(tk.Tk):
             values=["食", "衣", "住", "行", "文教康樂", "百貨", "ALL"],
         )
         self.industry.grid(row=2, column=1, padx=1, pady=10)
+        self.industry.bind("<<ComboboxSelected>>", self.load_data)
 
         self.age_var = tk.StringVar()
         self.age_var.set("請選擇年齡層")
         self.age = ttk.Combobox(
             topFrame,
             textvariable=self.age_var,
-            values=["未滿20歲", "20(含)-25歲", "25(含)-30歲", "30(含)-35歲", "35(含)-40歲", "40(含)-45歲", "45(含)-50歲", "50(含)-55歲", "55(含)-60歲", "60(含)-65歲", "65(含)-70歲", "70(含)-75歲", "75(含)-80歲", "80(含)歲以上", "ALL"],
+            values=[
+                "未滿20歲",
+                "20(含)-25歲",
+                "25(含)-30歲",
+                "30(含)-35歲",
+                "35(含)-40歲",
+                "40(含)-45歲",
+                "45(含)-50歲",
+                "50(含)-55歲",
+                "55(含)-60歲",
+                "60(含)-65歲",
+                "65(含)-70歲",
+                "70(含)-75歲",
+                "75(含)-80歲",
+                "80(含)歲以上",
+                "ALL",
+            ],
         )
         self.age.grid(row=3, column=1, padx=1, pady=10)
+        self.age.bind("<<ComboboxSelected>>", self.load_data)
 
         # state="active"->按鈕可以點擊,command按鈕被點擊時執行self.load_data
-        self.botton = tk.Button(
-            topFrame, text="搜尋", state="active", command=self.load_data, width=30
-        ).grid(row=5, column=0, padx=10, pady=20, columnspan=2)
-        topFrame.pack(side=tk.LEFT, padx=(5, 5), pady=(0, 5), fill="y")
+        # self.botton = tk.Button(
+        # topFrame, text="搜尋", state="active", command=self.load_data, width=30
+        # ).grid(row=5, column=0, padx=10, pady=20, columnspan=2)
+        topFrame.pack(side=tk.LEFT, padx=(5, 5), pady=(0, 5),fill="y")
 
         # ------------圖表-------------#
         self.charFrame = ttk.LabelFrame(self)
@@ -129,25 +147,25 @@ class Window(tk.Tk):
         self.bottomFrame6 = ttk.Labelframe(self.charFrame, text="年齡層")
         self.bottomFrame6.grid(row=2, column=3, padx=(0, 3), pady=(0, 5), sticky="nsew")
 
-
         self.show_line_charts()
         self.show_pie_charts()
-        #self.show_heatmap_charts()
+        # self.show_heatmap_charts()
         self.show_area_charts()
         self.show_industry_charts()
         self.show_age_charts()
-    def load_data(self):
+
+    def load_data(self, event):
         selected_area = self.area_var.get()
         selected_age = self.age_var.get()
         selected_industry = self.industry_var.get()
-        if selected_area != '請選擇地區':
+        if selected_area != "請選擇地區":
             self.show_area_charts()
 
-        if selected_age != '請選擇年齡層':
+        if selected_age != "請選擇年齡層":
             self.show_age_charts()
             self.show_line_charts()
 
-        if selected_industry != '請選擇產業別':
+        if selected_industry != "請選擇產業別":
             self.show_industry_charts()
 
     # ------------折線圖------------#
@@ -157,9 +175,9 @@ class Window(tk.Tk):
         fig, ax = plt.subplots(figsize=(5, 3))
         fig.subplots_adjust(bottom=0.1, top=0.9)
 
-        if selected_age !='請選擇年齡層' and selected_age != 'ALL':
+        if selected_age != "請選擇年齡層" and selected_age != "ALL":
             sql = f"SELECT 年, 年齡層, SUM(信用卡金額) AS 信用卡交易總金額 FROM age WHERE 年齡層 = '{selected_age}' GROUP BY 年, 年齡層"
-        
+
         else:
             sql = """
                 WITH ranked_data AS (
@@ -225,7 +243,7 @@ class Window(tk.Tk):
             df["信用卡交易金額"],
             labels=df["性別"],
             textprops={"fontsize": 10},
-            autopct='%1.1f%%'
+            autopct="%1.1f%%",
         )
         ax.set_title(f"不同性別的信用卡交易金額分布")
 
@@ -245,8 +263,6 @@ class Window(tk.Tk):
 
     # ------------熱力圖------------#
     def show_heatmap_charts(self):
-        
-
         # ------create canvas------#
         if not hasattr(self, "canvas_heatmap_chart"):
             self.canvas_heatmap_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame4)
@@ -264,11 +280,15 @@ class Window(tk.Tk):
     def show_area_charts(self):
         selected_area = self.area_var.get()
         conn = sqlite3.connect("creditcard.db")
-        
-        if selected_area != '請選擇地區' and selected_area != 'ALL' and selected_area != '六都':
+
+        if (
+            selected_area != "請選擇地區"
+            and selected_area != "ALL"
+            and selected_area != "六都"
+        ):
             sql = f"SELECT 地區, 信用卡金額 AS 信用卡交易金額, SUM(信用卡金額) / SUM(信用卡交易筆數) AS 平均交易金額 FROM age WHERE 地區 = '{selected_area}' AND 產業別 != '其他' GROUP BY 地區"
-        
-        elif selected_area == '六都':
+
+        elif selected_area == "六都":
             sql = """
                 SELECT
                     地區,
@@ -281,7 +301,7 @@ class Window(tk.Tk):
                 GROUP BY
                     地區
             """
-        
+
         else:
             sql = """
                     SELECT
@@ -299,7 +319,7 @@ class Window(tk.Tk):
                     LIMIT 8
                 """
         df = pd.read_sql_query(sql, conn)
-        #df["平均交易金額"] = df["信用卡交易金額"] / df["信用卡交易筆數"]
+        # df["平均交易金額"] = df["信用卡交易金額"] / df["信用卡交易筆數"]
         fig, ax = plt.subplots(figsize=(5, 3))
 
         sns.barplot(x="地區", y="信用卡交易金額", data=df, ax=ax)
@@ -310,13 +330,12 @@ class Window(tk.Tk):
         sns.lineplot(x="地區", y="平均交易金額", data=df, color="red", marker="o", ax=ax2)
         ax2.set_ylabel("平均交易金額")
 
-        ax.tick_params(axis='y', labelsize=9)
-        ax2.tick_params(axis='y', labelsize=6.5)
+        ax.tick_params(axis="y", labelsize=9)
+        ax2.tick_params(axis="y", labelsize=6.5)
 
         # Set an empty string as xlabel
         ax.set_xlabel("")
         ax2.set_xlabel("")
-
 
         # ------create canvas------#
         if not hasattr(self, "canvas_area_chart"):
@@ -335,7 +354,7 @@ class Window(tk.Tk):
     def show_industry_charts(self):
         selected_industry = self.industry_var.get()
         conn = sqlite3.connect("creditcard.db")
-        if selected_industry != '請選擇產業別' and selected_industry != 'ALL':
+        if selected_industry != "請選擇產業別" and selected_industry != "ALL":
             sql = f"SELECT 產業別, SUM(信用卡金額) AS 信用卡交易金額, SUM(信用卡金額) / SUM(信用卡交易筆數) AS 平均交易金額 FROM age WHERE 產業別 = '{selected_industry}' GROUP BY 產業別"
         else:
             sql = """
@@ -351,7 +370,7 @@ class Window(tk.Tk):
                     產業別;
             """
         df = pd.read_sql_query(sql, conn)
-        
+
         fig, ax = plt.subplots(figsize=(5, 3))
 
         sns.barplot(x="產業別", y="信用卡交易金額", data=df, ax=ax)
@@ -363,9 +382,8 @@ class Window(tk.Tk):
         sns.lineplot(x="產業別", y="平均交易金額", data=df, color="red", marker="o", ax=ax2)
         ax2.set_ylabel("平均交易金額")
 
-    
-        ax.tick_params(axis='y', labelsize=8)
-        ax2.tick_params(axis='y', labelsize=6.5)
+        ax.tick_params(axis="y", labelsize=8)
+        ax2.tick_params(axis="y", labelsize=6.5)
 
         # Set an empty string as xlabel
         ax.set_xlabel("")
@@ -392,7 +410,7 @@ class Window(tk.Tk):
     def show_age_charts(self):
         selected_age = self.age_var.get()
         conn = sqlite3.connect("creditcard.db")
-        if selected_age != '請選擇年齡層' and selected_age != 'ALL':
+        if selected_age != "請選擇年齡層" and selected_age != "ALL":
             sql = f"SELECT 年齡層, SUM(信用卡金額) AS 信用卡交易金額, SUM(信用卡金額) / SUM(信用卡交易筆數) AS 平均交易金額 FROM age WHERE 年齡層 = '{selected_age}' AND 產業別 != '其他'"
         else:
             sql = """
@@ -435,9 +453,9 @@ class Window(tk.Tk):
         ax2.set_ylabel("平均交易金額")
 
         # Set x-axis font size
-        ax.tick_params(axis='x', labelsize=8.5)
-        ax.tick_params(axis='y', labelsize=8)
-        ax2.tick_params(axis='y', labelsize=6.5)
+        ax.tick_params(axis="x", labelsize=8.5)
+        ax.tick_params(axis="y", labelsize=8)
+        ax2.tick_params(axis="y", labelsize=6.5)
 
         # Set an empty string as xlabel
         ax.set_xlabel("")
