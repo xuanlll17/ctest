@@ -40,6 +40,9 @@ class Window(tk.Tk):
         self.industryLabel = ttk.Label(topFrame, text="產業別:").grid(
             row=2, column=0, padx=(1, 0), pady=10, sticky="w"
         )
+        self.ageLabel = ttk.Label(topFrame, text="年齡層:").grid(
+            row=3, column=0, padx=(1, 0), pady=10, sticky="w"
+        )
         # ------StringVar------#
         # self.data = ttk.Label(
         # topFrame,
@@ -53,6 +56,7 @@ class Window(tk.Tk):
             topFrame,
             textvariable=self.area_var,
             values=[
+                "六都",
                 "臺北市",
                 "高雄市",
                 "新北市",
@@ -85,9 +89,18 @@ class Window(tk.Tk):
         self.industry = ttk.Combobox(
             topFrame,
             textvariable=self.industry_var,
-            values=["食", "衣", "住", "行", "文教康樂", "百貨", "其他", "ALL"],
+            values=["食", "衣", "住", "行", "文教康樂", "百貨", "ALL"],
         )
         self.industry.grid(row=2, column=1, padx=10, pady=10)
+
+        self.age_var = tk.StringVar()
+        self.age_var.set("請選擇年齡層")
+        self.age = ttk.Combobox(
+            topFrame,
+            textvariable=self.age_var,
+            values=["未滿20歲", "20(含)-25歲", "25(含)-30歲", "30(含)-35歲", "35(含)-40歲", "40(含)-45歲", "45(含)-50歲", "50(含)-55歲", "55(含)-60歲", "60(含)-65歲", "65(含)-70歲", "70(含)-75歲", "75(含)-80歲", "80(含)歲以上", "ALL"],
+        )
+        self.age.grid(row=3, column=1, padx=10, pady=10)
 
         # state="active"->按鈕可以點擊,command按鈕被點擊時執行self.load_data
         self.botton = tk.Button(
@@ -116,43 +129,60 @@ class Window(tk.Tk):
         self.bottomFrame6 = ttk.Labelframe(self.charFrame, text="年齡層")
         self.bottomFrame6.grid(row=2, column=3, padx=(0, 3), pady=(0, 5), sticky="nsew")
 
-    def load_data(self):
+
         self.show_line_charts()
         self.show_pie_charts()
         self.show_bar_charts()
         self.show_area_charts()
         self.show_industry_charts()
         self.show_age_charts()
+    def load_data(self):
+        selected_area = self.area_var.get()
+        selected_age = self.age_var.get()
+        selected_industry = self.industry_var.get()
+        if selected_area != '請選擇地區':
+            self.show_area_charts()
+
+        if selected_age != '請選擇年齡層':
+            self.show_age_charts()
+            self.show_line_charts()
+
+        if selected_industry != '請選擇產業別':
+            self.show_industry_charts()
 
     # ------------折線圖------------#
     def show_line_charts(self):
         conn = sqlite3.connect("creditcard.db")
-
+        selected_age = self.age_var.get()
         fig, ax = plt.subplots(figsize=(5, 3))
         fig.subplots_adjust(bottom=0.1, top=0.9)
 
-        sql = """
-            WITH ranked_data AS (
+        if selected_age !='請選擇年齡層' and selected_age != 'ALL':
+            sql = f"SELECT 年, 年齡層, SUM(信用卡金額) AS 信用卡交易總金額 FROM age WHERE 年齡層 = '{selected_age}' GROUP BY 年, 年齡層"
+        
+        else:
+            sql = """
+                WITH ranked_data AS (
+                    SELECT
+                        年,
+                        年齡層,
+                        SUM(信用卡金額) AS 信用卡交易總金額,
+                        RANK() OVER (PARTITION BY 年 ORDER BY SUM(信用卡金額) DESC) AS rnk
+                    FROM
+                        age
+                    GROUP BY
+                        年,
+                        年齡層
+                )
                 SELECT
                     年,
                     年齡層,
-                    SUM(信用卡金額) AS 信用卡交易總金額,
-                    RANK() OVER (PARTITION BY 年 ORDER BY SUM(信用卡金額) DESC) AS rnk
+                    信用卡交易總金額
                 FROM
-                    age
-                GROUP BY
-                    年,
-                    年齡層
-            )
-            SELECT
-                年,
-                年齡層,
-                信用卡交易總金額
-            FROM
-                ranked_data
-            WHERE
-                rnk <= 8;
-        """
+                    ranked_data
+                WHERE
+                    rnk <= 8;
+            """
         df = pd.read_sql_query(sql, conn)
         pivot_df = df.pivot(index="年", columns=f"年齡層", values="信用卡交易總金額")
         pivot_df.plot(kind="line", marker="o", linestyle="-", ax=ax)
@@ -278,33 +308,57 @@ class Window(tk.Tk):
         self.canvas_bar_chart.draw()
 
     def show_area_charts(self):
+        selected_area = self.area_var.get()
         conn = sqlite3.connect("creditcard.db")
-        sql = """
-            SELECT
-                地區,
-                信用卡交易筆數,
-                SUM(信用卡金額) AS 信用卡交易金額,
-                AVG(信用卡金額) AS 平均交易金額
-            FROM
-                age
-            GROUP BY
-                地區
-            ORDER BY
-                信用卡交易金額 DESC
-            LIMIT 8;
-        """
+        
+        if selected_area != '請選擇地區' and selected_area != 'ALL' and selected_area != '六都':
+            sql = f"SELECT 地區, 信用卡金額 AS 信用卡交易金額, SUM(信用卡金額) / SUM(信用卡交易筆數) AS 平均交易金額 FROM age WHERE 地區 = '{selected_area}' AND 產業別 != '其他' GROUP BY 地區"
+        
+        elif selected_area == '六都':
+            sql = """
+                SELECT
+                    地區,
+                    SUM(信用卡金額) AS 信用卡交易金額,
+                    SUM(信用卡金額) / SUM(信用卡交易筆數) AS 平均交易金額
+                FROM
+                    age
+                WHERE 
+                    地區 in ('臺北市', '新北市', '桃園市', '臺中市', '臺南市', '高雄市')
+                GROUP BY
+                    地區
+            """
+        
+        else:
+            sql = """
+                    SELECT
+                        地區,
+                        SUM(信用卡金額) AS 信用卡交易金額,
+                        SUM(信用卡金額) / SUM(信用卡交易筆數) AS 平均交易金額
+                    FROM
+                        age
+                    WHERE
+                        產業別 != '其他'
+                    GROUP BY
+                        地區
+                    ORDER BY
+                        信用卡交易金額 DESC
+                    LIMIT 8
+                """
         df = pd.read_sql_query(sql, conn)
-        # df["平均交易金額"] = df["信用卡交易金額[新台幣]"] / df["信用卡交易筆數"]
+        #df["平均交易金額"] = df["信用卡交易金額"] / df["信用卡交易筆數"]
         fig, ax = plt.subplots(figsize=(4.5, 3))
 
         sns.barplot(x="地區", y="信用卡交易金額", data=df, ax=ax)
         ax.set_title("不同地區的信用卡交易金額")
-        ax.set_xlabel("地區")
         ax.set_ylabel("信用卡交易金額")
 
         ax2 = ax.twinx()
         sns.lineplot(x="地區", y="平均交易金額", data=df, color="red", marker="o", ax=ax2)
         ax2.set_ylabel("平均交易金額")
+        # Set an empty string as xlabel
+        ax.set_xlabel("")
+        ax2.set_xlabel("")
+
 
         # ------create canvas------#
         if not hasattr(self, "canvas_area_chart"):
@@ -321,32 +375,39 @@ class Window(tk.Tk):
         self.canvas_area_chart.draw()
 
     def show_industry_charts(self):
+        selected_industry = self.industry_var.get()
         conn = sqlite3.connect("creditcard.db")
-        sql = """
-        SELECT
-            產業別,
-            信用卡交易筆數,
-            SUM(信用卡金額) AS 信用卡交易金額,
-            AVG(信用卡金額) AS 平均交易金額
-        FROM
-            age
-        WHERE
-            產業別 != '其他'
-        GROUP BY
-            產業別;
-    """
+        if selected_industry != '請選擇產業別' and selected_industry != 'ALL':
+            sql = f"SELECT 產業別, SUM(信用卡金額) AS 信用卡交易金額, SUM(信用卡金額) / SUM(信用卡交易筆數) AS 平均交易金額 FROM age WHERE 產業別 = '{selected_industry}' GROUP BY 產業別"
+        else:
+            sql = """
+                SELECT
+                    產業別,
+                    SUM(信用卡金額) AS 信用卡交易金額,
+                    SUM(信用卡金額) / SUM(信用卡交易筆數) AS 平均交易金額
+                FROM
+                    age
+                WHERE
+                    產業別 != '其他'
+                GROUP BY
+                    產業別;
+            """
         df = pd.read_sql_query(sql, conn)
-        # df["平均交易金額"] = df["信用卡交易金額"] / df["信用卡交易筆數"]
+        
         fig, ax = plt.subplots(figsize=(5, 3))
 
         sns.barplot(x="產業別", y="信用卡交易金額", data=df, ax=ax)
-        ax.set_title("不同地區的信用卡交易金額")
+        ax.set_title("不同產業別的信用卡交易金額")
         ax.set_xlabel("產業別")
         ax.set_ylabel("信用卡交易金額")
 
         ax2 = ax.twinx()
         sns.lineplot(x="產業別", y="平均交易金額", data=df, color="red", marker="o", ax=ax2)
         ax2.set_ylabel("平均交易金額")
+
+        # Set an empty string as xlabel
+        ax.set_xlabel("")
+        ax2.set_xlabel("")
 
         # ------create canvas------#
         if not hasattr(self, "canvas_industry_chart"):
@@ -367,21 +428,41 @@ class Window(tk.Tk):
         self.canvas_industry_chart.draw()
 
     def show_age_charts(self):
+        selected_age = self.age_var.get()
         conn = sqlite3.connect("creditcard.db")
-        sql = """
-        SELECT
-            年齡層,
-            信用卡交易筆數,
-            SUM(信用卡金額) AS 信用卡交易金額,
-            AVG(信用卡金額) AS 平均交易金額
-        FROM
-            age
-        GROUP BY
-            年齡層;
-    """
+        if selected_age != '請選擇年齡層' and selected_age != 'ALL':
+            sql = f"SELECT 年齡層, SUM(信用卡金額) AS 信用卡交易金額, SUM(信用卡金額) / SUM(信用卡交易筆數) AS 平均交易金額 FROM age WHERE 年齡層 = '{selected_age}' AND 產業別 != '其他'"
+        else:
+            sql = """
+                SELECT
+                    CASE
+                        WHEN 年齡層 LIKE '%20(含)-25%' THEN '20-25'
+                        WHEN 年齡層 LIKE '%25(含)-30%' THEN '25-30'
+                        WHEN 年齡層 LIKE '%30(含)-35%' THEN '30-35'
+                        WHEN 年齡層 LIKE '%35(含)-40%' THEN '35-40'
+                        WHEN 年齡層 LIKE '%40(含)-45%' THEN '40-45'
+                        WHEN 年齡層 LIKE '%45(含)-50%' THEN '45-50'
+                        WHEN 年齡層 LIKE '%50(含)-55%' THEN '50-55'
+                        WHEN 年齡層 LIKE '%55(含)-60%' THEN '55-60'
+                        WHEN 年齡層 LIKE '%60(含)-65%' THEN '60-65'
+                        WHEN 年齡層 LIKE '%65(含)-70%' THEN '65-70'
+                        ELSE 'Other'
+                    END AS 年齡層,
+                    SUM(信用卡金額) AS 信用卡交易金額,
+                    SUM(信用卡金額) / SUM(信用卡交易筆數) AS 平均交易金額
+                FROM
+                    age
+                WHERE
+                    產業別 != '其他'
+                GROUP BY
+                    年齡層
+                ORDER BY
+                    年齡層 ASC, 信用卡交易金額 DESC
+                LIMIT 10;
+            """
         df = pd.read_sql_query(sql, conn)
         # df["平均交易金額"] = df["信用卡交易金額"] / df["信用卡交易筆數"]
-        fig, ax = plt.subplots(figsize=(4.5, 3))
+        fig, ax = plt.subplots(figsize=(5, 3))
 
         sns.barplot(x="年齡層", y="信用卡交易金額", data=df, ax=ax)
         ax.set_title("不同年齡層的信用卡交易金額")
@@ -391,6 +472,10 @@ class Window(tk.Tk):
         ax2 = ax.twinx()
         sns.lineplot(x="年齡層", y="平均交易金額", data=df, color="red", marker="o", ax=ax2)
         ax2.set_ylabel("平均交易金額")
+
+        # Set an empty string as xlabel
+        ax.set_xlabel("")
+        ax2.set_xlabel("")
 
         # ------create canvas------#
         if not hasattr(self, "canvas_age_chart"):
