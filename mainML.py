@@ -114,7 +114,7 @@ class Window(tk.Tk):
         self.bottomFrame1 = ttk.Labelframe(self.charFrame, text="圓餅圖")
         self.bottomFrame1.grid(row=1, column=1, padx=(3, 5), pady=(0, 5), sticky="nsew")
 
-        self.bottomFrame2 = ttk.Labelframe(self.charFrame, text="長條圖")
+        self.bottomFrame2 = ttk.Labelframe(self.charFrame, text="熱力圖")
         self.bottomFrame2.grid(row=1, column=2, padx=(0, 5), pady=(0, 5), sticky="nsew")
 
         self.bottomFrame3 = ttk.Labelframe(self.charFrame, text="折線圖")
@@ -132,7 +132,7 @@ class Window(tk.Tk):
 
         self.show_line_charts()
         self.show_pie_charts()
-        self.show_bar_charts()
+        #self.show_heatmap_charts()
         self.show_area_charts()
         self.show_industry_charts()
         self.show_age_charts()
@@ -213,31 +213,21 @@ class Window(tk.Tk):
         fig.subplots_adjust(bottom=0.1, top=0.9)
 
         sql = """
-            WITH ranked_data AS (
-                SELECT
-                    年齡層,
-                    SUM(信用卡金額) AS 信用卡交易總金額,
-                    RANK() OVER (PARTITION BY 年 ORDER BY SUM(信用卡金額) DESC) AS rnk
-                FROM
-                    age
-                GROUP BY
-                    年齡層
-            )
-            SELECT
-                年齡層,
-                信用卡交易總金額
-            FROM
-                ranked_data
-            WHERE
-                rnk <= 8;
+            SELECT 
+                性別, SUM(信用卡金額) AS 信用卡交易金額
+            FROM 
+                age
+            GROUP BY 
+                性別
         """
         df = pd.read_sql_query(sql, conn)
         ax.pie(
-            df["信用卡交易總金額"],
-            labels=df["年齡層"],
+            df["信用卡交易金額"],
+            labels=df["性別"],
             textprops={"fontsize": 10},
+            autopct='%1.1f%%'
         )
-        ax.set_title(f"各年齡層信用卡交易金額分布")
+        ax.set_title(f"不同性別的信用卡交易金額分布")
 
         # ------create canvas------#
         if not hasattr(self, "canvas_pie_chart"):
@@ -253,59 +243,23 @@ class Window(tk.Tk):
 
         self.canvas_pie_chart.draw()
 
-    # ------------長條圖------------#
-    def show_bar_charts(self):
-        conn = sqlite3.connect("creditcard.db")
-
-        fig, ax = plt.subplots(figsize=(5, 3))
-        fig.subplots_adjust(bottom=0.1, top=0.9)
-
-        sql = """
-            WITH ranked_data AS (
-                SELECT
-                    年齡層,
-                    產業別,
-                    SUM(信用卡金額) AS 信用卡交易總金額,
-                    RANK() OVER (PARTITION BY 產業別 ORDER BY SUM(信用卡金額) DESC) AS rnk
-                FROM
-                    age
-                GROUP BY
-                    年齡層,
-                    產業別
-            )
-            SELECT
-                年齡層,
-                產業別,
-                信用卡交易總金額
-            FROM
-                ranked_data
-            WHERE
-                rnk <= 8;
-        """
-
-        df = pd.read_sql_query(sql, conn)
-        df_pivot = df.pivot(index="產業別", columns=f"年齡層", values="信用卡交易總金額")
-        df_pivot.plot(kind="bar", stacked=True, ax=ax, cmap="viridis", legend=False)
-
-        ax.set_title(f"各年齡層與產業別信用卡交易金額占比", pad=3)
-        ax.set_xticklabels(ax.get_xticklabels(), rotation=0)
-        ax.set_ylabel("信用卡交易總金額")
-        ax.tick_params(axis="x", labelsize=10)
-        ax.tick_params(axis="y", labelsize=10)
+    # ------------熱力圖------------#
+    def show_heatmap_charts(self):
+        
 
         # ------create canvas------#
-        if not hasattr(self, "canvas_bar_chart"):
-            self.canvas_bar_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame2)
-            canvas_widget = self.canvas_bar_chart.get_tk_widget()
+        if not hasattr(self, "canvas_heatmap_chart"):
+            self.canvas_heatmap_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame2)
+            canvas_widget = self.canvas_heatmap_chart.get_tk_widget()
             canvas_widget.grid(row=1, column=2, padx=(0, 5), pady=(0, 5), sticky="nsew")
         # ------update canvas content------#
         else:
-            self.canvas_bar_chart.get_tk_widget().destroy()
-            self.canvas_bar_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame2)
-            canvas_widget = self.canvas_bar_chart.get_tk_widget()
+            self.canvas_heatmap_chart.get_tk_widget().destroy()
+            self.canvas_heatmap_chart = FigureCanvasTkAgg(fig, master=self.bottomFrame2)
+            canvas_widget = self.canvas_heatmap_chart.get_tk_widget()
             canvas_widget.grid(row=1, column=2, padx=(0, 5), pady=(0, 5), sticky="nsew")
 
-        self.canvas_bar_chart.draw()
+        self.canvas_heatmap_chart.draw()
 
     def show_area_charts(self):
         selected_area = self.area_var.get()
@@ -405,6 +359,10 @@ class Window(tk.Tk):
         sns.lineplot(x="產業別", y="平均交易金額", data=df, color="red", marker="o", ax=ax2)
         ax2.set_ylabel("平均交易金額")
 
+    
+        ax.tick_params(axis='y', labelsize=6.5)
+        ax2.tick_params(axis='y', labelsize=6.5)
+
         # Set an empty string as xlabel
         ax.set_xlabel("")
         ax2.set_xlabel("")
@@ -466,12 +424,16 @@ class Window(tk.Tk):
 
         sns.barplot(x="年齡層", y="信用卡交易金額", data=df, ax=ax)
         ax.set_title("不同年齡層的信用卡交易金額")
-        ax.set_xlabel("年齡層")
         ax.set_ylabel("信用卡交易金額")
 
         ax2 = ax.twinx()
         sns.lineplot(x="年齡層", y="平均交易金額", data=df, color="red", marker="o", ax=ax2)
         ax2.set_ylabel("平均交易金額")
+
+        # Set x-axis font size
+        ax.tick_params(axis='x', labelsize=8.5)
+        ax.tick_params(axis='y', labelsize=6.5)
+        ax2.tick_params(axis='y', labelsize=6.5)
 
         # Set an empty string as xlabel
         ax.set_xlabel("")
