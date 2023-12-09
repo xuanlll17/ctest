@@ -9,7 +9,7 @@ dash1 = Dash(
 dash1.title = "信用卡消費樣態"
 lastest_data = data2.lastest_datetime_data()
 lastest_df = pd.DataFrame(
-    lastest_data, columns=["站點名稱", "更新時間", "行政區", "地址", "總數", "可借", "可還"]
+    lastest_data, columns=["年", "月", "地區", "產業別", "教育程度", "信用卡交易筆數", "信用卡交易金額"]
 )
 lastest_df1 = lastest_df.reset_index()
 lastest_df1["站點名稱"] = lastest_df1["站點名稱"].map(lambda name: name[11:])
