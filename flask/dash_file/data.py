@@ -1,6 +1,8 @@
 import requests
 import psycopg2
-import password as pw
+
+# import password as pw
+from . import password as pw
 import pandas as pd
 import csv
 
@@ -87,7 +89,6 @@ def __insert_data(conn, values: list[any]) -> None:
 
 
 def update_render_data() -> None:
-
     # ---------------連線到postgresql----------------#
     conn = psycopg2.connect(
         database=pw.DATABASE,
@@ -127,7 +128,7 @@ def lastest_datetime_data() -> list[tuple]:
     )
     cursor = conn.cursor()
     sql = """
-        select *  
+        select 年, 月, 地區, 產業別, 教育程度, 信用卡交易筆數, 信用卡交易金額  
         from education
     """
     cursor.execute(sql)
@@ -137,12 +138,10 @@ def lastest_datetime_data() -> list[tuple]:
 
     return rows
 
-
-def main():
+    # def main():
     __download_creditcard_data()
     trans_data()
     update_render_data()
 
-
-if __name__ == "__main__":
+    # if __name__ == "__main__":
     main()
