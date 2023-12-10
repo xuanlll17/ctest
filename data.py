@@ -34,10 +34,6 @@ def __download_credit_data() -> csv:
         "PHH",
         "KMH",
         "LCH",
-        "X1",
-        "LCSUM",
-        "MCT",
-        "LOC",
     ]
     area_code = {
         "63000000": "臺北市",

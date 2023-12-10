@@ -117,7 +117,7 @@ class Window(tk.Tk):
                 "ALL",
             ],
         )
-        self.age.grid(row=0, column=6, padx=(0,50), pady=10)
+        self.age.grid(row=0, column=6, padx=(0, 50), pady=10)
         self.age.bind("<<ComboboxSelected>>", self.load_data)
 
         # state="active"->按鈕可以點擊,command按鈕被點擊時執行self.load_data
@@ -128,7 +128,7 @@ class Window(tk.Tk):
 
         # ------------圖表-------------#
         self.charFrame = ttk.LabelFrame(self)
-        self.charFrame.pack(side=tk.LEFT, padx=5, pady=(0,5), expand=True, fill="both")
+        self.charFrame.pack(side=tk.LEFT, padx=5, pady=(0, 5), expand=True, fill="both")
         self.bottomFrame1 = ttk.Labelframe(self.charFrame, text="圓餅圖")
         self.bottomFrame1.grid(row=1, column=1, padx=(3, 3), pady=(0, 5), sticky="nsew")
 
@@ -297,7 +297,7 @@ class Window(tk.Tk):
                 FROM
                     age
                 WHERE 
-                    地區 in ('臺北市', '新北市', '桃園市', '臺中市', '臺南市', '高雄市')
+                    地區 in ('臺北市', '新北市', '桃園市', '臺中市', '臺南市', '高雄市') AND 產業別 != '其他'                    
                 GROUP BY
                     地區
             """
@@ -319,7 +319,6 @@ class Window(tk.Tk):
                     LIMIT 8
                 """
         df = pd.read_sql_query(sql, conn)
-        # df["平均交易金額"] = df["信用卡交易金額"] / df["信用卡交易筆數"]
         fig, ax = plt.subplots(figsize=(5, 3))
 
         sns.barplot(x="地區", y="信用卡交易金額", data=df, ax=ax)
@@ -477,7 +476,7 @@ class Window(tk.Tk):
 
 
 def main():
-    # data.csv_to_database()
+    data.csv_to_database()
 
     def on_closing():
         print("window關閉")
