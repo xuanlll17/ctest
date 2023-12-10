@@ -35,13 +35,13 @@ class Window(tk.Tk):
         # )
 
         self.areaLabel = ttk.Label(topFrame, text="地區:").grid(
-            row=1, column=0, padx=(1, 0), pady=10, sticky="w"
+            row=0, column=1, padx=(330, 10), pady=10, sticky="w"
         )
         self.industryLabel = ttk.Label(topFrame, text="產業別:").grid(
-            row=2, column=0, padx=(1, 0), pady=10, sticky="w"
+            row=0, column=3, padx=(50, 10), pady=10, sticky="w"
         )
         self.ageLabel = ttk.Label(topFrame, text="年齡層:").grid(
-            row=3, column=0, padx=(1, 0), pady=10, sticky="w"
+            row=0, column=5, padx=(50, 10), pady=10, sticky="w"
         )
         # ------StringVar------#
         # self.data = ttk.Label(
@@ -81,7 +81,7 @@ class Window(tk.Tk):
                 "ALL",
             ],
         )
-        self.area.grid(row=1, column=1, padx=1, pady=10)
+        self.area.grid(row=0, column=2, padx=1, pady=10)
         self.area.bind("<<ComboboxSelected>>", self.load_data)
 
         self.industry_var = tk.StringVar()
@@ -91,7 +91,7 @@ class Window(tk.Tk):
             textvariable=self.industry_var,
             values=["食", "衣", "住", "行", "文教康樂", "百貨", "ALL"],
         )
-        self.industry.grid(row=2, column=1, padx=1, pady=10)
+        self.industry.grid(row=0, column=4, padx=1, pady=10)
         self.industry.bind("<<ComboboxSelected>>", self.load_data)
 
         self.age_var = tk.StringVar()
@@ -117,29 +117,29 @@ class Window(tk.Tk):
                 "ALL",
             ],
         )
-        self.age.grid(row=3, column=1, padx=1, pady=10)
+        self.age.grid(row=0, column=6, padx=(0,50), pady=10)
         self.age.bind("<<ComboboxSelected>>", self.load_data)
 
         # state="active"->按鈕可以點擊,command按鈕被點擊時執行self.load_data
         # self.botton = tk.Button(
         # topFrame, text="搜尋", state="active", command=self.load_data, width=30
         # ).grid(row=5, column=0, padx=10, pady=20, columnspan=2)
-        topFrame.pack(side=tk.LEFT, padx=(5, 5), pady=(0, 5),fill="y")
+        topFrame.pack(padx=(5, 5), fill="x")
 
         # ------------圖表-------------#
         self.charFrame = ttk.LabelFrame(self)
-        self.charFrame.pack(side=tk.LEFT, expand=True, fill="both")
+        self.charFrame.pack(side=tk.LEFT, padx=5, pady=(0,5), expand=True, fill="both")
         self.bottomFrame1 = ttk.Labelframe(self.charFrame, text="圓餅圖")
-        self.bottomFrame1.grid(row=1, column=1, padx=(3, 5), pady=(0, 5), sticky="nsew")
+        self.bottomFrame1.grid(row=1, column=1, padx=(3, 3), pady=(0, 5), sticky="nsew")
 
         self.bottomFrame2 = ttk.Labelframe(self.charFrame, text="地區")
-        self.bottomFrame2.grid(row=1, column=2, padx=(0, 5), pady=(0, 5), sticky="nsew")
+        self.bottomFrame2.grid(row=1, column=2, padx=(0, 3), pady=(0, 5), sticky="nsew")
 
         self.bottomFrame3 = ttk.Labelframe(self.charFrame, text="折線圖")
         self.bottomFrame3.grid(row=1, column=3, padx=(0, 3), pady=(0, 5), sticky="nsew")
 
         self.bottomFrame4 = ttk.Labelframe(self.charFrame, text="熱力圖")
-        self.bottomFrame4.grid(row=2, column=1, padx=(0, 3), pady=(0, 5), sticky="nsew")
+        self.bottomFrame4.grid(row=2, column=1, padx=(3, 3), pady=(0, 5), sticky="nsew")
 
         self.bottomFrame5 = ttk.Labelframe(self.charFrame, text="產業別")
         self.bottomFrame5.grid(row=2, column=2, padx=(0, 3), pady=(0, 5), sticky="nsew")
