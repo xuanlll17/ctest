@@ -51,6 +51,20 @@ dash.layout = html.Div(
                     className="row",
                     style={"paddingTop": "2rem"},
                 ),
+                html.Div(
+                    [
+                        html.Div(
+                            [
+                                html.P("來源："),
+                                html.P("Data： 聯合信用卡處理中心Open API"),
+                                html.P("Icon： Image by toffeomurice from Pixabay"),
+                            ],
+                            className="col",
+                        )
+                    ],
+                    className="row",
+                    style={"paddingTop": "2rem","fontSize":"0.8rem","lineHeight":"0.3rem"},
+                ),
             ]
         )
     ],
