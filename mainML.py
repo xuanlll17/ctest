@@ -35,7 +35,7 @@ class Window(tk.Tk):
         # )
 
         self.areaLabel = ttk.Label(topFrame, text="地區:").grid(
-            row=0, column=1, padx=(330, 10), pady=10, sticky="w"
+            row=0, column=1, padx=(450, 10), pady=10, sticky="w"
         )
         self.industryLabel = ttk.Label(topFrame, text="產業別:").grid(
             row=0, column=3, padx=(50, 10), pady=10, sticky="w"
@@ -55,29 +55,12 @@ class Window(tk.Tk):
             topFrame,
             textvariable=self.area_var,
             values=[
-                "六都",
                 "臺北市",
                 "高雄市",
                 "新北市",
                 "臺中市",
                 "臺南市",
                 "桃園市",
-                "宜蘭縣",
-                "新竹縣",
-                "苗栗縣",
-                "彰化縣",
-                "南投縣",
-                "雲林縣",
-                "嘉義縣",
-                "嘉義市",
-                "屏東縣",
-                "臺東縣",
-                "花蓮縣",
-                "澎湖縣",
-                "基隆市",
-                "新竹市",
-                "金門縣",
-                "連江縣",
                 "ALL",
             ],
         )
@@ -136,7 +119,7 @@ class Window(tk.Tk):
         self.bottomFrame2.grid(row=1, column=2, padx=(0, 3), pady=(0, 5), sticky="nsew")
 
         self.bottomFrame3 = ttk.Labelframe(self.charFrame, text="折線圖")
-        self.bottomFrame3.grid(row=3, column=1, padx=(0, 3), pady=(0, 5), sticky="nsew")
+        self.bottomFrame3.grid(row=1, column=3, padx=(0, 3), pady=(0, 5), sticky="nsew")
 
         self.bottomFrame4 = ttk.Labelframe(self.charFrame, text="熱力圖")
         self.bottomFrame4.grid(row=2, column=1, padx=(3, 3), pady=(0, 5), sticky="nsew")
@@ -145,7 +128,7 @@ class Window(tk.Tk):
         self.bottomFrame5.grid(row=2, column=2, padx=(0, 3), pady=(0, 5), sticky="nsew")
 
         self.bottomFrame6 = ttk.Labelframe(self.charFrame, text="年齡層")
-        self.bottomFrame6.grid(row=3, column=2, padx=(0, 3), pady=(0, 5), sticky="nsew")
+        self.bottomFrame6.grid(row=2, column=3, padx=(0, 3), pady=(0, 5), sticky="nsew")
 
         self.show_line_charts()
         self.show_pie_charts()
@@ -172,7 +155,7 @@ class Window(tk.Tk):
     def show_line_charts(self):
         conn = sqlite3.connect("creditcard.db")
         selected_age = self.age_var.get()
-        fig, ax = plt.subplots(figsize=(10, 3))
+        fig, ax = plt.subplots(figsize=(6.5, 3))
         fig.subplots_adjust(bottom=0.1, top=0.9)
 
         if selected_age != "請選擇年齡層" and selected_age != "ALL":
@@ -273,11 +256,10 @@ class Window(tk.Tk):
         if (
             selected_area != "請選擇地區"
             and selected_area != "ALL"
-            and selected_area != "六都"
         ):
             sql = f"SELECT 地區, 信用卡金額 AS 信用卡交易金額, SUM(信用卡金額) / SUM(信用卡交易筆數) AS 平均交易金額 FROM age WHERE 地區 = '{selected_area}' AND 產業別 != '其他' GROUP BY 地區"
 
-        elif selected_area == "六都":
+        else:
             sql = """
                 SELECT
                     地區,
@@ -291,24 +273,8 @@ class Window(tk.Tk):
                     地區
             """
 
-        else:
-            sql = """
-                    SELECT
-                        地區,
-                        SUM(信用卡金額) AS 信用卡交易金額,
-                        SUM(信用卡金額) / SUM(信用卡交易筆數) AS 平均交易金額
-                    FROM
-                        age
-                    WHERE
-                        產業別 != '其他'
-                    GROUP BY
-                        地區
-                    ORDER BY
-                        信用卡交易金額 DESC
-                   
-                """
         df = pd.read_sql_query(sql, conn)
-        fig, ax = plt.subplots(figsize=(12.9, 3))
+        fig, ax = plt.subplots(figsize=(6, 3))
 
         sns.barplot(x="地區", y="信用卡交易金額", data=df, ax=ax)
         ax.set_title("不同地區的信用卡交易金額")
@@ -359,7 +325,7 @@ class Window(tk.Tk):
             """
         df = pd.read_sql_query(sql, conn)
 
-        fig, ax = plt.subplots(figsize=(12.9, 3))
+        fig, ax = plt.subplots(figsize=(6, 3))
 
         sns.barplot(x="產業別", y="信用卡交易金額", data=df, ax=ax)
         ax.set_title("不同產業別的信用卡交易金額")
@@ -403,7 +369,22 @@ class Window(tk.Tk):
         else:
             sql = """
                     SELECT
-                        年齡層,
+                        CASE
+                            WHEN 年齡層 LIKE '%未滿20%' THEN '-20'
+                            WHEN 年齡層 LIKE '%20(含)-25%' THEN '20-25'
+                            WHEN 年齡層 LIKE '%25(含)-30%' THEN '25-30'
+                            WHEN 年齡層 LIKE '%30(含)-35%' THEN '30-35'
+                            WHEN 年齡層 LIKE '%35(含)-40%' THEN '35-40'
+                            WHEN 年齡層 LIKE '%40(含)-45%' THEN '40-45'
+                            WHEN 年齡層 LIKE '%45(含)-50%' THEN '45-50'
+                            WHEN 年齡層 LIKE '%50(含)-55%' THEN '50-55'
+                            WHEN 年齡層 LIKE '%55(含)-60%' THEN '55-60'
+                            WHEN 年齡層 LIKE '%60(含)-65%' THEN '60-65'
+                            WHEN 年齡層 LIKE '%65(含)-70%' THEN '65-70'
+                            WHEN 年齡層 LIKE '%70(含)-75%' THEN '70-75'
+                            WHEN 年齡層 LIKE '%75(含)-80%' THEN '75-80'
+                            WHEN 年齡層 LIKE '%80%' THEN '80+'
+                        END 年齡層,
                         SUM(信用卡金額) AS 信用卡交易金額,
                         SUM(信用卡金額) / SUM(信用卡交易筆數) AS 平均交易金額
                     FROM
@@ -413,24 +394,10 @@ class Window(tk.Tk):
                     GROUP BY
                         年齡層
                     ORDER BY
-                        CASE
-                            WHEN 年齡層 LIKE '%未滿20%' THEN 1
-                            WHEN 年齡層 LIKE '%20(含)-25%' THEN 2
-                            WHEN 年齡層 LIKE '%25(含)-30%' THEN 3
-                            WHEN 年齡層 LIKE '%30(含)-35%' THEN 4
-                            WHEN 年齡層 LIKE '%35(含)-40%' THEN 5
-                            WHEN 年齡層 LIKE '%40(含)-45%' THEN 6
-                            WHEN 年齡層 LIKE '%45(含)-50%' THEN 7
-                            WHEN 年齡層 LIKE '%50(含)-55%' THEN 8
-                            WHEN 年齡層 LIKE '%55(含)-60%' THEN 9
-                            WHEN 年齡層 LIKE '%60(含)-65%' THEN 10
-                            WHEN 年齡層 LIKE '%65(含)-70%' THEN 11
-                            ELSE 12
-                        END ASC;
+                        年齡層 ASC
                 """
         df = pd.read_sql_query(sql, conn)
-        # df["平均交易金額"] = df["信用卡交易金額"] / df["信用卡交易筆數"]
-        fig, ax = plt.subplots(figsize=(12.9, 3))
+        fig, ax = plt.subplots(figsize=(6.5, 3))
 
         sns.barplot(x="年齡層", y="信用卡交易金額", data=df, ax=ax)
         ax.set_title("不同年齡層的信用卡交易金額")
@@ -440,12 +407,10 @@ class Window(tk.Tk):
         sns.lineplot(x="年齡層", y="平均交易金額", data=df, color="red", marker="o", ax=ax2)
         ax2.set_ylabel("平均交易金額")
 
-        # Set x-axis font size
-        ax.tick_params(axis="x", labelsize=8.5)
+        ax.tick_params(axis="x", labelsize=7.5)
         ax.tick_params(axis="y", labelsize=10)
         ax2.tick_params(axis="y", labelsize=10)
 
-        # Set an empty string as xlabel
         ax.set_xlabel("")
         ax2.set_xlabel("")
 
@@ -465,7 +430,7 @@ class Window(tk.Tk):
 
 
 def main():
-    # data.csv_to_database()
+    #data.csv_to_database()
 
     def on_closing():
         print("window關閉")
