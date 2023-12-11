@@ -3,24 +3,24 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 from . import data
 
-dash = Dash(
-    requests_pathname_prefix="/dash/app/", external_stylesheets=[dbc.themes.BOOTSTRAP]
+dash3 = Dash(
+    requests_pathname_prefix="/dash/app3/", external_stylesheets=[dbc.themes.BOOTSTRAP]
 )
-dash.title = "信用卡消費樣態"
-lastest_data = data.edu_data()
+dash3.title = "信用卡消費樣態"
+lastest_data = data.sex_data()
 
 
 lastest_df = pd.DataFrame(
-    lastest_data, columns=["年", "月", "地區", "產業別", "教育程度", "信用卡交易筆數", "信用卡交易金額"]
+    lastest_data, columns=["年", "月", "地區", "產業別", "性別", "信用卡交易筆數", "信用卡交易金額"]
 )
 
 
-dash.layout = html.Div(
+dash3.layout = html.Div(
     [
         dbc.Container(
             [
                 html.Div(
-                    [html.Div([html.H1("各教育程度信用卡消費樣態")], className="col text-center")],
+                    [html.Div([html.H1("兩性信用卡消費樣態")], className="col text-center")],
                     className="row",
                     style={"paddingTop": "2rem"},
                 ),
@@ -63,7 +63,11 @@ dash.layout = html.Div(
                         )
                     ],
                     className="row",
-                    style={"paddingTop": "2rem","fontSize":"0.8rem","lineHeight":"0.3rem"},
+                    style={
+                        "paddingTop": "2rem",
+                        "fontSize": "0.8rem",
+                        "lineHeight": "0.3rem",
+                    },
                 ),
             ]
         )
