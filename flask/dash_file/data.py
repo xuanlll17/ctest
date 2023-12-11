@@ -14,7 +14,31 @@ def __download_creditcard_data():
     response = requests.request("GET", edu_url)
     with open(f"./six_e.csv", "wb") as file:
         file.write(response.content)
-    print("職業類別消費資料讀取成功")
+    print("教育程度資料讀取成功")
+
+    #age_url = ("https://bas.nccc.com.tw/nccc-nop/OpenAPI/C02/ageconsumption/MCT/ALL")
+    #response = requests.request("GET", age_url)
+    #with open(f"./six_a.csv", "wb") as file:
+        #file.write(response.content)
+    #print("年齡層消費資料讀取成功")
+
+    #job_url = ("https://bas.nccc.com.tw/nccc-nop/OpenAPI/C04/jobsconsumption/MCT/ALL")
+    #response = requests.request("GET", job_url)
+    #with open(f"./six_e.csv", "wb") as file:
+        #file.write(response.content)
+    #print("職業類別消費資料讀取成功")
+
+    #sex_url = ("https://bas.nccc.com.tw/nccc-nop/OpenAPI/C01/sexconsumption/MCT/ALL")
+    #response = requests.request("GET", sex_url)
+    #with open(f"./six_s.csv", "wb") as file:
+        #file.write(response.content)
+    #print("性別消費資料讀取成功")
+
+    #incom_url = ("https://bas.nccc.com.tw/nccc-nop/OpenAPI/C03/incomegroupsconsumption/MCT/ALL")
+    #response = requests.request("GET", incom_url)
+    #with open(f"./six_i.csv", "wb") as file:
+        #file.write(response.content)
+    #print("收入消費資料讀取成功")
 
 
 def trans_data():
@@ -26,18 +50,18 @@ def trans_data():
         "67000000": "臺南市",
         "68000000": "桃園市",
     }
-
-    df = pd.read_csv("six_e.csv")
-    df["年月"] = df["年月"].astype(str)
-    df["年"] = df["年月"].str[:4]
-    df["月"] = df["年月"].str[4:]
-    df = df[(df["產業別"] != "其他") & (df["教育程度類別"] != "其他")]
-    df = df[df["年"] == "2023"]
-    df["地區"] = df["地區"].apply(lambda x: area_code.get(x, x))
-    df = df.drop(columns=["年月"])
-    df = df[["年", "月"] + [col for col in df.columns if col not in ["年", "月"]]]
-    df = df.rename(columns={"信用卡交易金額[新台幣]": "信用卡交易金額"})
-    df.to_csv("six_e.csv", index=False, encoding="utf-8")
+    type = ["a","e","i","j","s"]
+    for item in type:
+        df = pd.read_csv(f"six_{item}.csv")
+        df["年月"] = df["年月"].astype(str)
+        df["年"] = df["年月"].str[:4]
+        df["月"] = df["年月"].str[4:]
+        df = df[(df["產業別"] != "其他") & (df["教育程度類別"] != "其他")]
+        df = df[df["年"] == "2023"]
+        df = df.drop(columns=["年月"])
+        df = df[["年", "月"] + [col for col in df.columns if col not in ["年", "月"]]]
+        df = df.rename(columns={"信用卡交易金額[新台幣]": "信用卡交易金額"})
+        df.to_csv("six_e.csv", index=False, encoding="utf-8")
 
     with open("six_e.csv", "r", encoding="utf-8") as file:
         csv_reader = csv.DictReader(file)
