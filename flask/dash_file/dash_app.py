@@ -1,4 +1,4 @@
-from dash import Dash, html, dash_table
+from dash import Dash, html, dash_table, callback, Input, Output, dcc
 import dash_bootstrap_components as dbc
 import pandas as pd
 from . import data
@@ -24,6 +24,70 @@ dash.layout = html.Div(
                     className="row",
                     style={"paddingTop": "2rem"},
                 ),
+                html.Div([
+                    dbc.DropdownMenu(
+                        label="資料類別",
+                        children=[
+                            dbc.DropdownMenuItem(
+                                "年齡層",
+                                href="/dash/app1/",
+                                external_link=True),
+                            dbc.DropdownMenuItem(
+                                "職業類別",
+                                href="/dash/app2/",
+                                external_link=True),
+                            dbc.DropdownMenuItem(
+                                "兩性",
+                                href="/dash/app3/",
+                                external_link=True),
+                            dbc.DropdownMenuItem(
+                                "年收入",
+                                href="/dash/app4/",
+                                external_link=True),
+                        ],
+                    ),
+                    dbc.DropdownMenu(
+                        label="月份",
+                        children=[
+                            dbc.DropdownMenuItem("1"),
+                            dbc.DropdownMenuItem("2"),
+                            dbc.DropdownMenuItem("3"),
+                            dbc.DropdownMenuItem("4"),
+                            dbc.DropdownMenuItem("5"),
+                            dbc.DropdownMenuItem("6"),
+                            dbc.DropdownMenuItem("7"),
+                            dbc.DropdownMenuItem("8"),
+                            dbc.DropdownMenuItem("9"),
+                            dbc.DropdownMenuItem("ALL"),
+                        ],
+                    ),
+                    dbc.DropdownMenu(
+                        label="地區",
+                        children=[
+                            dbc.DropdownMenuItem("臺北市"),
+                            dbc.DropdownMenuItem("新北市"),
+                            dbc.DropdownMenuItem("桃園市"),
+                            dbc.DropdownMenuItem("臺中市"),
+                            dbc.DropdownMenuItem("臺南市"),
+                            dbc.DropdownMenuItem("高雄市"),
+                            dbc.DropdownMenuItem("ALL"),
+                        ],
+                    ),
+                    dbc.DropdownMenu(
+                        label="產業別",
+                        children=[
+                            dbc.DropdownMenuItem("食"),
+                            dbc.DropdownMenuItem("衣"),
+                            dbc.DropdownMenuItem("住"),
+                            dbc.DropdownMenuItem("行"),
+                            dbc.DropdownMenuItem("文教康樂"),
+                            dbc.DropdownMenuItem("百貨"),
+                            dbc.DropdownMenuItem("ALL"),
+                        ],
+                    ),
+                ],
+                className="row row-cols-auto align-items-end",
+                style={"paddingTop":'2rem'}),
                 html.Div(
                     [
                         html.Div(
