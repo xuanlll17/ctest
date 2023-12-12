@@ -212,7 +212,7 @@ def update_render_data() -> None:
     )
 
     __create_table(conn)
-    type = ["age", "edu", "incom", "job", "sex"]      #需重新輸入職業類別資料
+    type = ["age", "edu", "incom", "job", "sex"]
     columns = ["年齡層", "教育程度類別", "年收入", "職業類別", "性別"]
     for item, column in zip(type, columns):
         with open(f"six_{item}_2023.csv", "r", encoding="utf-8") as file:
@@ -289,7 +289,6 @@ def job_data() -> list[tuple]:
     sql = """
         select 年, 月, 地區, 產業別, 職業類別, 信用卡交易筆數, 信用卡交易金額  
         from job
-        where "職業類別" != '其他'
     """
     cursor.execute(sql)
     rows = cursor.fetchall()
