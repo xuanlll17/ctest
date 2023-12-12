@@ -55,6 +55,7 @@ dash4.layout = html.Div(
                                 {"label": "高雄市", "value": "高雄市"},
                                 {"label": "ALL", "value": "ALL"},
                             ],
+                            style={"width": "29%"},
                         ),
                         dcc.Dropdown(
                             id="month",
@@ -71,6 +72,7 @@ dash4.layout = html.Div(
                                 {"label": "9月", "value": "9"},
                                 {"label": "ALL", "value": "ALL"},
                             ],
+                            style={"width": "29%"},
                         ),
                         dcc.Dropdown(
                             id="industry",
@@ -84,7 +86,9 @@ dash4.layout = html.Div(
                                 {"label": "百貨", "value": "百貨"},
                                 {"label": "ALL", "value": "ALL"},
                             ],
+                            style={"width": "29%"},
                         ),
+                        
                     ],
                     className="row row-cols-auto align-items-end",
                     style={"paddingTop": "2rem"},
@@ -142,15 +146,12 @@ dash4.layout = html.Div(
 )
 
 
-@callback(
+@dash4.callback(
     Output("data", "data"),
     [Input("area", "value"), Input("month", "value"), Input("industry", "value")],
 )
 def update_table(selected_area, selected_month, selected_industry):
-    print(
-        f"Selected Area: {selected_area}, Selected Month: {selected_month}, Selected Industry: {selected_industry}"
-    )
-
+    print(selected_area, selected_industry, selected_month)
     filtered_data = [
         row
         for row in lastest_data
@@ -163,6 +164,6 @@ def update_table(selected_area, selected_month, selected_industry):
         filtered_data, columns=["年", "月", "地區", "產業別", "年收入", "信用卡交易筆數", "信用卡交易金額"]
     )
 
-    print(update_df.head())  # Print the first few rows of the DataFrame
-
+    print(update_df)
     return update_df.to_dict("records")
+
