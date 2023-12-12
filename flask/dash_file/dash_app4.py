@@ -151,13 +151,13 @@ dash4.layout = html.Div(
     [Input("area", "value"), Input("month", "value"), Input("industry", "value")],
 )
 def update_table(selected_area, selected_month, selected_industry):
-    print(selected_area, selected_industry, selected_month)
+    #print(selected_area, selected_industry, selected_month)
     filtered_data = [
         row
         for row in lastest_data
-        if (selected_area == "ALL" or row[2] == selected_area)
-        and (selected_month == "ALL" or str(row[1]) == selected_month)
-        and (selected_industry == "ALL" or row[3] == selected_industry)
+        if (selected_area is None or selected_area == "ALL" or row[2] == selected_area)
+        and (selected_month is None or selected_month == "ALL" or str(row[1]) == selected_month)
+        and (selected_industry is None or selected_industry == "ALL" or row[3] == selected_industry)
     ]
 
     update_df = pd.DataFrame(
