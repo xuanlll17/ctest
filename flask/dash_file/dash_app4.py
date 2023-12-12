@@ -142,8 +142,14 @@ dash4.layout = html.Div(
 )
 
 
-@callback(Output("data", "data"), [Input("area", "value"), Input("month", "value"), Input("industry", "value")])
+@callback(
+    Output("data", "data"),
+    [Input("area", "value"), Input("month", "value"), Input("industry", "value")],
+)
 def update_table(selected_area, selected_month, selected_industry):
+    print(
+        f"Selected Area: {selected_area}, Selected Month: {selected_month}, Selected Industry: {selected_industry}"
+    )
 
     filtered_data = [
         row
@@ -156,5 +162,7 @@ def update_table(selected_area, selected_month, selected_industry):
     update_df = pd.DataFrame(
         filtered_data, columns=["年", "月", "地區", "產業別", "年收入", "信用卡交易筆數", "信用卡交易金額"]
     )
+
+    print(update_df.head())  # Print the first few rows of the DataFrame
 
     return update_df.to_dict("records")
