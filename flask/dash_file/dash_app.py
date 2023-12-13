@@ -2,6 +2,7 @@ from dash import Dash, html, dash_table, callback, Input, Output, dcc
 import dash_bootstrap_components as dbc
 import pandas as pd
 from . import data
+import plotly.express as px
 
 dash = Dash(
     requests_pathname_prefix="/dash/app/", external_stylesheets=[dbc.themes.BOOTSTRAP]
@@ -138,6 +139,10 @@ dash.layout = html.Div(
                         "lineHeight": "0.3rem",
                     },
                 ),
+                html.Div([
+                    html.H4('Life expentancy progression of countries per continents'),
+                    dcc.Graph(id="graph"),
+                ])
             ]
         )
     ],
@@ -165,5 +170,19 @@ def update_table(selected_area, selected_month, selected_industry):
 
     print(update_df)
     return update_df.to_dict("records")
+
+@dash.callback(
+    Output("graph", "figure"),
+    Input("industry","value")
+)
+def update_pie_chart(selected_value):
+    df = data.edu_data()
+    if selected_value is None or selected_value == "ALL":
+        fig = px.pie(df,values=df[5], names=df[4])  #list[tuple] 取值問題(for in)
+        return fig
+    else:
+        filtered_df = df[df['產業別'] == f'{selected_value}']
+        fig = px.pie(filtered_df, values='信用卡交易金額', names='年齡層')
+        return fig
 
 
