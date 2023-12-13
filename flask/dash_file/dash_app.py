@@ -55,7 +55,6 @@ dash.layout = html.Div(
                                 {"label": "高雄市", "value": "高雄市"},
                                 {"label": "ALL", "value": "ALL"},
                             ],
-                            style={"width": "29%"},
                         ),
                         dcc.Dropdown(
                             id="month",
@@ -72,7 +71,7 @@ dash.layout = html.Div(
                                 {"label": "9月", "value": "9"},
                                 {"label": "ALL", "value": "ALL"},
                             ],
-                            style={"width": "29%"},
+
                         ),
                         dcc.Dropdown(
                             id="industry",
@@ -86,7 +85,7 @@ dash.layout = html.Div(
                                 {"label": "百貨", "value": "百貨"},
                                 {"label": "ALL", "value": "ALL"},
                             ],
-                            style={"width": "29%"},
+
                         ),
                         
                     ],
@@ -166,4 +165,5 @@ def update_table(selected_area, selected_month, selected_industry):
 
     print(update_df)
     return update_df.to_dict("records")
+
 

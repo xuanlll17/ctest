@@ -43,52 +43,25 @@ dash2.layout = html.Div(
                                 ),
                             ],
                         ),
-                        dcc.Dropdown(
+                        dbc.DropdownMenu(
                             id="area",
-                            value="ALL",
-                            options=[
-                                {"label": "臺北市", "value": "臺北市"},
-                                {"label": "新北市", "value": "新北市"},
-                                {"label": "桃園市", "value": "桃園市"},
-                                {"label": "臺中市", "value": "臺中市"},
-                                {"label": "臺南市", "value": "臺南市"},
-                                {"label": "高雄市", "value": "高雄市"},
-                                {"label": "ALL", "value": "ALL"},
+                            label="地區",
+                            children=[
+                                dbc.DropdownMenuItem(
+                                    "臺北市",id="Taipei",n_clicks=None
+                                ),
+                                dbc.DropdownMenuItem(
+                                    "新北市",id="NewTaipei",n_clicks=None
+                                ),
+                                dbc.DropdownMenuItem(
+                                    "臺中市",id="Taichung",n_clicks=None
+                                ),
+                                dbc.DropdownMenuItem(
+                                    "高雄市",id="Kaohsiung",n_clicks=None
+                                ),
                             ],
-                            style={"width": "29%"},
                         ),
-                        dcc.Dropdown(
-                            id="month",
-                            value="ALL",
-                            options=[
-                                {"label": "1月", "value": "1"},
-                                {"label": "2月", "value": "2"},
-                                {"label": "3月", "value": "3"},
-                                {"label": "4月", "value": "4"},
-                                {"label": "5月", "value": "5"},
-                                {"label": "6月", "value": "6"},
-                                {"label": "7月", "value": "7"},
-                                {"label": "8月", "value": "8"},
-                                {"label": "9月", "value": "9"},
-                                {"label": "ALL", "value": "ALL"},
-                            ],
-                            style={"width": "29%"},
-                        ),
-                        dcc.Dropdown(
-                            id="industry",
-                            value="ALL",
-                            options=[
-                                {"label": "食", "value": "食"},
-                                {"label": "衣", "value": "衣"},
-                                {"label": "住", "value": "住"},
-                                {"label": "行", "value": "行"},
-                                {"label": "文教康樂", "value": "文教康樂"},
-                                {"label": "百貨", "value": "百貨"},
-                                {"label": "ALL", "value": "ALL"},
-                            ],
-                            style={"width": "29%"},
-                        ),
-                        
+                        html.P(id="item-clicks", className="mt-3")               
                     ],
                     className="row row-cols-auto align-items-end",
                     style={"paddingTop": "2rem"},
