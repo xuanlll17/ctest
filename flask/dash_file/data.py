@@ -1,10 +1,26 @@
 import requests
 import psycopg2
 #import password as pw
-from . import password as pw
 import pandas as pd
 import csv
+import os
+import socket
 
+myip = socket.gethostbyname(socket.gethostname())
+if '172.17.0.0' <= myip <= '172.17.255.255':
+    from . import password as pw
+    print("本機")
+    DATABASE = pw.DATABASE
+    USER = pw.USER
+    PASSWORD = pw.PASSWORD
+    HOST = pw.HOST
+else:
+    DATABASE = os.environ['DATABASE']
+    USER = os.environ['USER']
+    PASSWORD = os.environ['PASSWORD']
+    HOST = os.environ['HOST']
+
+print(f'我的ip{myip}')
 
 def __download_creditcard_data():
     edu_url = (
@@ -204,10 +220,10 @@ def __insert_data(conn, tablename, values: list[any]) -> None:
 def update_render_data() -> None:
     # ---------------連線到postgresql----------------#
     conn = psycopg2.connect(
-        database=pw.DATABASE,
-        user=pw.USER,
-        password=pw.PASSWORD,
-        host=pw.HOST,
+        database=DATABASE,
+        user=USER,
+        password=PASSWORD,
+        host=HOST,
         port="5432",
     )
 
@@ -237,10 +253,10 @@ def update_render_data() -> None:
 
 def edu_data() -> list[tuple]:
     conn = psycopg2.connect(
-        database=pw.DATABASE,
-        user=pw.USER,
-        password=pw.PASSWORD,
-        host=pw.HOST,
+        database=DATABASE,
+        user=USER,
+        password=PASSWORD,
+        host=HOST,
         port="5432",
     )
     cursor = conn.cursor()
@@ -258,10 +274,10 @@ def edu_data() -> list[tuple]:
 
 def age_data() -> list[tuple]:
     conn = psycopg2.connect(
-        database=pw.DATABASE,
-        user=pw.USER,
-        password=pw.PASSWORD,
-        host=pw.HOST,
+        database=DATABASE,
+        user=USER,
+        password=PASSWORD,
+        host=HOST,
         port="5432",
     )
     cursor = conn.cursor()
@@ -279,10 +295,10 @@ def age_data() -> list[tuple]:
 
 def job_data() -> list[tuple]:
     conn = psycopg2.connect(
-        database=pw.DATABASE,
-        user=pw.USER,
-        password=pw.PASSWORD,
-        host=pw.HOST,
+        database=DATABASE,
+        user=USER,
+        password=PASSWORD,
+        host=HOST,
         port="5432",
     )
     cursor = conn.cursor()
@@ -300,10 +316,10 @@ def job_data() -> list[tuple]:
 
 def sex_data() -> list[tuple]:
     conn = psycopg2.connect(
-        database=pw.DATABASE,
-        user=pw.USER,
-        password=pw.PASSWORD,
-        host=pw.HOST,
+        database=DATABASE,
+        user=USER,
+        password=PASSWORD,
+        host=HOST,
         port="5432",
     )
     cursor = conn.cursor()
@@ -321,10 +337,10 @@ def sex_data() -> list[tuple]:
 
 def incom_data() -> list[tuple]:
     conn = psycopg2.connect(
-        database=pw.DATABASE,
-        user=pw.USER,
-        password=pw.PASSWORD,
-        host=pw.HOST,
+        database=DATABASE,
+        user=USER,
+        password=PASSWORD,
+        host=HOST,
         port="5432",
     )
     cursor = conn.cursor()
