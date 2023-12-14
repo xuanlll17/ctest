@@ -589,7 +589,7 @@ class ShowDetail(Dialog):
 
 def main():
   
-    data.csv_to_database()
+    #data.csv_to_database()
     def on_closing():
         print("window關閉")
         #將canvas關閉
