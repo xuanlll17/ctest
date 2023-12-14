@@ -176,13 +176,17 @@ def update_table(selected_area, selected_month, selected_industry):
     Input("industry","value")
 )
 def update_pie_chart(selected_value):
-    df = data.edu_data()
+    global lastest_df
     if selected_value is None or selected_value == "ALL":
-        fig = px.pie(df,values=df[5], names=df[4])  #list[tuple] 取值問題(for in)
+        # Group by industry and sum the transaction amounts
+        industry_sum = lastest_df.groupby('產業別')['信用卡交易金額'].sum().reset_index()
+
+        # Create a pie chart
+        fig = px.pie(industry_sum, values='信用卡交易金額', names='產業別', title='各產業別信用卡交易金額總和')
         return fig
     else:
-        filtered_df = df[df['產業別'] == f'{selected_value}']
-        fig = px.pie(filtered_df, values='信用卡交易金額', names='年齡層')
+        filtered_df = lastest_df[lastest_df['產業別'] == f'{selected_value}']
+        fig = px.pie(filtered_df, values='信用卡交易金額', names='教育程度')
         return fig
 
 
