@@ -50,6 +50,8 @@ dash1.layout = html.Div(
                                     "年收入", href="/dash/app4/", external_link=True
                                 ),
                             ],
+                            color="secondary",
+                            style={"marginRight": "1rem"},
                         ),
                         dbc.InputGroup(
                             [
@@ -66,6 +68,7 @@ dash1.layout = html.Div(
                                         {"label": "高雄市", "value": "高雄市"},
                                         {"label": "ALL", "value": "ALL"},
                                     ],
+                                    style={"marginRight": "1rem"},
                                 ),
                             ],
                      
@@ -88,6 +91,7 @@ dash1.layout = html.Div(
                                         {"label": "9月", "value": "9"},
                                         {"label": "ALL", "value": "ALL"},
                                     ],
+                                    style={"marginRight": "1rem"},
                                 ),
                             ],
                         
@@ -107,6 +111,7 @@ dash1.layout = html.Div(
                                         {"label": "百貨", "value": "百貨"},
                                         {"label": "ALL", "value": "ALL"},
                                     ],
+                                    style={"marginRight": "1rem"},
                                 ),
                             ],
        
@@ -133,13 +138,14 @@ dash1.layout = html.Div(
                                         {"label": "80(含)歲以上", "value": "80(含)歲以上"},
                                         {"label": "ALL", "value": "ALL"},
                                     ],
+                                    
                                 ),
                             ],
                           
                         )
                     ],
                     className="d-flex justify-content-center",
-                    style={"paddingTop": "2rem",},
+                    style={"paddingTop": "2rem"},
                 ),
                 html.Div(
                     [

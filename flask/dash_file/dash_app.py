@@ -45,10 +45,9 @@ dash.layout = html.Div(
                                 ),
                                 dbc.DropdownMenuItem(
                                     "年收入", href="/dash/app4/", external_link=True
-                                ),
-                                
+                                ),      
                             ],
-                          
+                            style={"marginRight": "1rem"},
                         ),
                         dbc.InputGroup(
                             [
@@ -65,6 +64,7 @@ dash.layout = html.Div(
                                         {"label": "高雄市", "value": "高雄市"},
                                         {"label": "ALL", "value": "ALL"},
                                     ],
+                                    style={"marginRight": "1rem"},
                                 ),
                             ],
                      
@@ -87,6 +87,7 @@ dash.layout = html.Div(
                                         {"label": "9月", "value": "9"},
                                         {"label": "ALL", "value": "ALL"},
                                     ],
+                                    style={"marginRight": "1rem"},
                                 ),
                             ],
                         
@@ -106,6 +107,7 @@ dash.layout = html.Div(
                                         {"label": "百貨", "value": "百貨"},
                                         {"label": "ALL", "value": "ALL"},
                                     ],
+                                    style={"marginRight": "1rem"},
                                 ),
                             ],
        
