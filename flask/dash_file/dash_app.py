@@ -216,9 +216,9 @@ def update_table(selected_area, selected_month, selected_industry, selected_educ
 
 @dash.callback(
     Output("graph", "figure"),
-    Input("industry","value")
+    [Input("industry","value"),Input("edu","value")]
 )
-def update_pie_chart(selected_value):
+def update_pie_chart(selected_value, selected_edu_value):
     global lastest_df
     if selected_value is None or selected_value == "ALL":
         # Group by industry and sum the transaction amounts
@@ -230,6 +230,10 @@ def update_pie_chart(selected_value):
     else:
         filtered_df = lastest_df[lastest_df['產業別'] == f'{selected_value}']
         fig = px.pie(filtered_df, values='信用卡交易金額', names='教育程度')
+        # Highlight the selected education level by pulling it out
+        highlighted_edu = selected_edu_value
+        pull_values = [0.2 if edu == highlighted_edu else 0 for edu in fig.data[0]['labels']]
+        fig.update_traces(pull=pull_values)
         return fig
     
 @dash.callback(
