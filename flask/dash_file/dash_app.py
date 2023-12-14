@@ -140,8 +140,9 @@ dash.layout = html.Div(
                     },
                 ),
                 html.Div([
-                    html.H4('Life expentancy progression of countries per continents'),
                     dcc.Graph(id="graph"),
+                    dcc.Graph(id="graph_line"),
+                    dcc.Graph(id="graph_bar"),
                 ])
             ]
         )
@@ -188,5 +189,32 @@ def update_pie_chart(selected_value):
         filtered_df = lastest_df[lastest_df['產業別'] == f'{selected_value}']
         fig = px.pie(filtered_df, values='信用卡交易金額', names='教育程度')
         return fig
+    
+@dash.callback(
+    Output("graph_line", "figure"),
+    Input("industry","value")
+)
+def update_line_chart(selected):
+    global lastest_df
+    # 將資料按照年和月進行分組，計算每個月的信用卡消費金額總和
+    monthly_total = lastest_df.groupby(['年', '月'])['信用卡交易金額'].sum().reset_index()
+
+    # 繪製折線圖
+    fig = px.line(monthly_total, x="月", y="信用卡交易金額", color="年", title='每月信用卡消費金額變化', markers=True)
+
+    return fig
+
+@dash.callback(
+    Output("graph_bar", "figure"),
+    Input("industry","value")
+)
+def update_line_chart(select):
+    global lastest_df
+    # 將資料按照地區進行分組，計算每個地區的信用卡消費金額總和
+    region_sum = lastest_df.groupby('地區')['信用卡交易金額'].sum().reset_index()
+
+    fig = px.bar(region_sum, x='地區', y='信用卡交易金額', title='Total Credit Card Transaction Amount by Region')
+
+    return fig
 
 
