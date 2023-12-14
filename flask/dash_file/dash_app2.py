@@ -2,6 +2,7 @@ from dash import Dash, html, dash_table, callback, Input, Output, dcc
 import dash_bootstrap_components as dbc
 import pandas as pd
 from . import data
+import plotly.express as px
 
 dash2 = Dash(
     requests_pathname_prefix="/dash/app2/", external_stylesheets=[dbc.themes.BOOTSTRAP]
@@ -30,6 +31,9 @@ dash2.layout = html.Div(
                             label="資料類別",
                             children=[
                                 dbc.DropdownMenuItem(
+                                    "首頁", href="/dash/index/",external_link=True
+                                ),
+                                dbc.DropdownMenuItem(
                                     "教育程度", href="/dash/app/", external_link=True
                                 ),
                                 dbc.DropdownMenuItem(
@@ -42,28 +46,93 @@ dash2.layout = html.Div(
                                     "年收入", href="/dash/app4/", external_link=True
                                 ),
                             ],
+                            color="success",
+                            style={"marginRight": "1rem"},
                         ),
-                        dbc.DropdownMenu(
-                            id="area",
-                            label="地區",
-                            children=[
-                                dbc.DropdownMenuItem(
-                                    "臺北市",id="Taipei",n_clicks=None
-                                ),
-                                dbc.DropdownMenuItem(
-                                    "新北市",id="NewTaipei",n_clicks=None
-                                ),
-                                dbc.DropdownMenuItem(
-                                    "臺中市",id="Taichung",n_clicks=None
-                                ),
-                                dbc.DropdownMenuItem(
-                                    "高雄市",id="Kaohsiung",n_clicks=None
+                        dbc.InputGroup(
+                            [
+                                dbc.InputGroupText("地區"),
+                                dbc.Select(
+                                    id="area",
+                                    value="ALL",
+                                    options=[
+                                        {"label": "臺北市", "value": "臺北市"},
+                                        {"label": "新北市", "value": "新北市"},
+                                        {"label": "桃園市", "value": "桃園市"},
+                                        {"label": "臺中市", "value": "臺中市"},
+                                        {"label": "臺南市", "value": "臺南市"},
+                                        {"label": "高雄市", "value": "高雄市"},
+                                        {"label": "ALL", "value": "ALL"},
+                                    ],
+                                    style={"marginRight": "1rem"},
                                 ),
                             ],
+                     
                         ),
-                        html.P(id="item-clicks", className="mt-3")               
+                        dbc.InputGroup(
+                            [
+                                dbc.InputGroupText("月份"),
+                                dbc.Select(
+                                    id="month",
+                                    value="ALL",
+                                    options=[
+                                        {"label": "1月", "value": "1"},
+                                        {"label": "2月", "value": "2"},
+                                        {"label": "3月", "value": "3"},
+                                        {"label": "4月", "value": "4"},
+                                        {"label": "5月", "value": "5"},
+                                        {"label": "6月", "value": "6"},
+                                        {"label": "7月", "value": "7"},
+                                        {"label": "8月", "value": "8"},
+                                        {"label": "9月", "value": "9"},
+                                        {"label": "ALL", "value": "ALL"},
+                                    ],
+                                    style={"marginRight": "1rem"},
+                                ),
+                            ],
+                        
+                        ),
+                         dbc.InputGroup(
+                            [
+                                dbc.InputGroupText("產業別"),
+                                dbc.Select(
+                                    id="industry",
+                                    value="ALL",
+                                    options=[
+                                        {"label": "食", "value": "食"},
+                                        {"label": "衣", "value": "衣"},
+                                        {"label": "住", "value": "住"},
+                                        {"label": "行", "value": "行"},
+                                        {"label": "文教康樂", "value": "文教康樂"},
+                                        {"label": "百貨", "value": "百貨"},
+                                        {"label": "ALL", "value": "ALL"},
+                                    ],
+                                    style={"marginRight": "1rem"},
+                                ),
+                            ],
+       
+                        ),
+                        dbc.InputGroup(
+                            [
+                                dbc.InputGroupText("職業類別"),
+                                dbc.Select(
+                                    id="job",
+                                    value="ALL",
+                                    options=[
+                                        {"label": "軍警人員一", "value": "軍警人員一"},
+                                        {"label": "軍警人員二", "value": "軍警人員二"},
+                                        {"label": "其他公共行政類", "value": "其他公共行政類"},
+                                        {"label": "教育類", "value": "教育類"},
+                                        {"label": "工商及服務類", "value": "工商及服務類"},
+                                        {"label": "專業及技術服務類", "value": "專業及技術服務類"},
+                                        {"label": "ALL", "value": "ALL"},
+                                    ],
+                                ),
+                            ],
+                          
+                        )
                     ],
-                    className="row row-cols-auto align-items-end",
+                    className="d-flex justify-content-center",
                     style={"paddingTop": "2rem"},
                 ),
                 html.Div(
@@ -112,6 +181,11 @@ dash2.layout = html.Div(
                         "lineHeight": "0.3rem",
                     },
                 ),
+                html.Div([
+                    dcc.Graph(id="graph"),
+                    dcc.Graph(id="graph_line"),
+                    dcc.Graph(id="graph_bar"),
+                ])
             ]
         )
     ],
@@ -140,3 +214,61 @@ def update_table(selected_area, selected_month, selected_industry):
     print(update_df)
     return update_df.to_dict("records")
 
+@dash2.callback(
+    Output("graph", "figure"),
+    Input("industry","value")
+)
+def update_pie_chart(selected_value):
+    global lastest_df
+    if selected_value is None or selected_value == "ALL":
+        # Group by industry and sum the transaction amounts
+        industry_sum = lastest_df.groupby('產業別')['信用卡交易金額'].sum().reset_index()
+
+        # Create a pie chart
+        fig = px.pie(industry_sum, values='信用卡交易金額', names='產業別', title='各產業別信用卡交易金額總和')
+        return fig
+    else:
+        filtered_df = lastest_df[lastest_df['產業別'] == f'{selected_value}']
+        fig = px.pie(filtered_df, values='信用卡交易金額', names='職業類別')
+        return fig
+    
+@dash2.callback(
+    Output("graph_line", "figure"),
+    Input("job","value")
+)
+def update_line_chart(selected_job):
+    global lastest_df
+    if selected_job is None or selected_job == "ALL":
+        # 將資料按照年和月進行分組，計算每個月的信用卡消費金額總和
+        monthly_total = lastest_df.groupby(['年', '月', '職業類別'])['信用卡交易金額'].sum().reset_index()
+
+        # 繪製折線圖
+        fig = px.line(monthly_total, x="月", y="信用卡交易金額", color="職業類別", title='每月信用卡消費金額變化', markers=True)
+
+        return fig
+    else:
+        monthly_total = lastest_df.groupby(['年', '月', '職業類別'])['信用卡交易金額'].sum().reset_index()
+        filtered_df = monthly_total[monthly_total['職業類別'] == f'{selected_job}']
+        print(filtered_df)
+        fig = px.line(filtered_df, x="月", y="信用卡交易金額", color="職業類別", title='每月信用卡消費金額變化', markers=True)
+        return fig
+
+@dash2.callback(
+    Output("graph_bar", "figure"),
+    Input("area","value")
+)
+def update_line_chart(selected_area):
+    global lastest_df
+    if selected_area is None or selected_area == "ALL":
+        region_sum = lastest_df.groupby('地區')['信用卡交易金額'].sum().reset_index()
+
+        fig = px.bar(region_sum, x='地區', y='信用卡交易金額', title='Total Credit Card Transaction Amount by Region')
+
+        return fig
+    else:
+        region_sum = lastest_df.groupby('地區')['信用卡交易金額'].sum().reset_index()
+
+        fig = px.bar(region_sum, x='地區', y='信用卡交易金額', title='Total Credit Card Transaction Amount by Region')
+        highlighted_region = selected_area
+        fig.update_traces(marker_color=['blue' if region == highlighted_region else 'gray' for region in region_sum['地區']])
+        return fig

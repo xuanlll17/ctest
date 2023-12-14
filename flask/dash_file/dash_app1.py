@@ -138,7 +138,6 @@ dash1.layout = html.Div(
                                         {"label": "80(含)歲以上", "value": "80(含)歲以上"},
                                         {"label": "ALL", "value": "ALL"},
                                     ],
-                                    
                                 ),
                             ],
                           
