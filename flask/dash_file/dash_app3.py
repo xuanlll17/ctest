@@ -21,7 +21,7 @@ dash3.layout = html.Div(
         dbc.Container(
             [
                 html.Div(
-                    [html.Div([html.H1("兩性信用卡消費樣態")], className="col text-center")],
+                    [html.Div([html.H1("性別信用卡消費樣態")], className="col text-center")],
                     className="row",
                     style={"paddingTop": "2rem"},
                 ),
