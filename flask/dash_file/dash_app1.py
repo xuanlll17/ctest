@@ -238,14 +238,14 @@ def update_pie_chart(selected_value, selected_age_value):
     else:
         if selected_age_value != 'ALL':
             filtered_df = lastest_df[lastest_df['產業別'] == f'{selected_value}']
-            fig = px.pie(filtered_df, values='信用卡交易金額', names='教育程度',title=f'{selected_value} / {selected_age_value} 信用卡交易金額占比')
+            fig = px.pie(filtered_df, values='信用卡交易金額', names='年齡層',title=f'{selected_value} / {selected_age_value} 信用卡交易金額占比')
             highlight_age = selected_age_value
             fig.update_traces(
                 marker=dict(colors=['rgba(1,87,155,0.2)' if age != highlight_age else '' for age in fig.data[0]['labels']]),
             )
         else:
             filtered_df = lastest_df[lastest_df['產業別'] == f'{selected_value}']
-            fig = px.pie(filtered_df, values='信用卡交易金額', names='教育程度', title=f'{selected_value} / 各教育程度信用卡交易金額分布')
+            fig = px.pie(filtered_df, values='信用卡交易金額', names='年齡層', title=f'{selected_value} / 各年齡層信用卡交易金額分布')
     return fig
     
 @dash1.callback(
