@@ -162,6 +162,11 @@ dash.layout = html.Div(
                     className="row",
                     style={"paddingTop": "2rem"},
                 ),
+                html.Div([
+                    dcc.Graph(id="graph"),
+                    dcc.Graph(id="graph_line"),
+                    dcc.Graph(id="graph_bar"),
+                ]),
                 html.Div(
                     [
                         html.Div(
@@ -180,11 +185,6 @@ dash.layout = html.Div(
                         "lineHeight": "0.3rem",
                     },
                 ),
-                html.Div([
-                    dcc.Graph(id="graph"),
-                    dcc.Graph(id="graph_line"),
-                    dcc.Graph(id="graph_bar"),
-                ])
             ]
         )
     ],
@@ -222,19 +222,18 @@ def update_pie_chart(selected_value, selected_edu_value):
     global lastest_df
     if selected_value is None or selected_value == "ALL":
         industry_sum = lastest_df.groupby('產業別')['信用卡交易金額'].sum().reset_index()
-        fig = px.pie(industry_sum, values='信用卡交易金額', names='產業別', title='各產業別信用卡交易金額總和')
+        fig = px.pie(industry_sum, values='信用卡交易金額', names='產業別', title='各產業別信用卡交易金額分布')
     else:
         if selected_edu_value != 'ALL':
             filtered_df = lastest_df[lastest_df['產業別'] == f'{selected_value}']
-            fig = px.pie(filtered_df, values='信用卡交易金額', names='教育程度')
-            highlighted_edu = selected_edu_value
-            opacity_values = [1 if edu == highlighted_edu else 0.1 for edu in fig.data[0]['labels']]
+            fig = px.pie(filtered_df, values='信用卡交易金額', names='教育程度',title=f'{selected_value} / {selected_edu_value} 信用卡交易金額占比')
+            highlight_edu = selected_edu_value
             fig.update_traces(
-                marker=dict(colors=['rgba(0,0,255,' + str(opacity) + ')' for opacity in opacity_values]),
+                marker=dict(colors=['rgba(1,87,155,0.2)' if edu != highlight_edu else '' for edu in fig.data[0]['labels']]),
             )
         else:
             filtered_df = lastest_df[lastest_df['產業別'] == f'{selected_value}']
-            fig = px.pie(filtered_df, values='信用卡交易金額', names='教育程度')
+            fig = px.pie(filtered_df, values='信用卡交易金額', names='教育程度', title=f'{selected_value} / 各教育程度信用卡交易金額分布')
     return fig
     
 @dash.callback(
@@ -248,12 +247,12 @@ def update_line_chart(selected_edu):
         monthly_total = lastest_df.groupby(['年', '月', '教育程度'])['信用卡交易金額'].sum().reset_index()
 
         # 繪製折線圖
-        fig = px.line(monthly_total, x="月", y="信用卡交易金額", color="教育程度", title='每月信用卡消費金額變化', markers=True)
+        fig = px.line(monthly_total, x="月", y="信用卡交易金額", color="教育程度", title='各教育程度每月信用卡交易金額趨勢', markers=True)
     else:
         monthly_total = lastest_df.groupby(['年', '月', '教育程度'])['信用卡交易金額'].sum().reset_index()
         filtered_df = monthly_total[monthly_total['教育程度'] == f'{selected_edu}']
         print(filtered_df)
-        fig = px.line(filtered_df, x="月", y="信用卡交易金額", color="教育程度", title='每月信用卡消費金額變化', markers=True)
+        fig = px.line(filtered_df, x="月", y="信用卡交易金額", color="教育程度", title=f'{selected_edu}每月信用卡交易金額趨勢', markers=True)
     return fig
 
 @dash.callback(
@@ -265,13 +264,13 @@ def update_bar_chart(selected_area):
     if selected_area is None or selected_area == "ALL":
         region_sum = lastest_df.groupby('地區')['信用卡交易金額'].sum().reset_index()
 
-        fig = px.bar(region_sum, x='地區', y='信用卡交易金額', title='Total Credit Card Transaction Amount by Region')
+        fig = px.bar(region_sum, x='地區', y='信用卡交易金額', title='各地區信用卡交易金額')
     else:
         region_sum = lastest_df.groupby('地區')['信用卡交易金額'].sum().reset_index()
 
-        fig = px.bar(region_sum, x='地區', y='信用卡交易金額', title='Total Credit Card Transaction Amount by Region')
+        fig = px.bar(region_sum, x='地區', y='信用卡交易金額', title=f'{selected_area}信用卡交易金額')
         highlighted_region = selected_area
-        fig.update_traces(marker_color=['blue' if region == highlighted_region else 'gray' for region in region_sum['地區']])
+        fig.update_traces(marker_color=['rgba(1,87,155,0.2)' if region != highlighted_region else 'blue' for region in region_sum['地區']])
     return fig
 
 
