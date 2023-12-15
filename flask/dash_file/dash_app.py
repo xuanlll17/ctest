@@ -243,10 +243,7 @@ def update_pie_chart(selected_value, selected_edu_value):
 def update_line_chart(selected_edu):
     global lastest_df
     if selected_edu is None or selected_edu == "ALL":
-        # 將資料按照年和月進行分組，計算每個月的信用卡消費金額總和
         monthly_total = lastest_df.groupby(['年', '月', '教育程度'])['信用卡交易金額'].sum().reset_index()
-
-        # 繪製折線圖
         fig = px.line(monthly_total, x="月", y="信用卡交易金額", color="教育程度", title='各教育程度每月信用卡交易金額趨勢', markers=True)
     else:
         monthly_total = lastest_df.groupby(['年', '月', '教育程度'])['信用卡交易金額'].sum().reset_index()

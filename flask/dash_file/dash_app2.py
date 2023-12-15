@@ -163,6 +163,11 @@ dash2.layout = html.Div(
                     className="row",
                     style={"paddingTop": "2rem"},
                 ),
+                html.Div([
+                    dcc.Graph(id="graph"),
+                    dcc.Graph(id="graph_line"),
+                    dcc.Graph(id="graph_bar"),
+                ]),
                 html.Div(
                     [
                         html.Div(
@@ -181,11 +186,6 @@ dash2.layout = html.Div(
                         "lineHeight": "0.3rem",
                     },
                 ),
-                html.Div([
-                    dcc.Graph(id="graph"),
-                    dcc.Graph(id="graph_line"),
-                    dcc.Graph(id="graph_bar"),
-                ])
             ]
         )
     ],
@@ -216,21 +216,25 @@ def update_table(selected_area, selected_month, selected_industry):
 
 @dash2.callback(
     Output("graph", "figure"),
-    Input("industry","value")
+    [Input("industry","value"),Input("job","value")]
 )
-def update_pie_chart(selected_value):
+def update_pie_chart(selected_value, selected_job_value):
     global lastest_df
     if selected_value is None or selected_value == "ALL":
-        # Group by industry and sum the transaction amounts
         industry_sum = lastest_df.groupby('產業別')['信用卡交易金額'].sum().reset_index()
-
-        # Create a pie chart
-        fig = px.pie(industry_sum, values='信用卡交易金額', names='產業別', title='各產業別信用卡交易金額總和')
-        return fig
+        fig = px.pie(industry_sum, values='信用卡交易金額', names='產業別', title='各產業別信用卡交易金額分布')
     else:
-        filtered_df = lastest_df[lastest_df['產業別'] == f'{selected_value}']
-        fig = px.pie(filtered_df, values='信用卡交易金額', names='職業類別')
-        return fig
+        if selected_job_value != 'ALL':
+            filtered_df = lastest_df[lastest_df['產業別'] == f'{selected_value}']
+            fig = px.pie(filtered_df, values='信用卡交易金額', names='職業類別',title=f'{selected_value} / {selected_job_value} 信用卡交易金額占比')
+            highlight_job = selected_job_value
+            fig.update_traces(
+                marker=dict(colors=['rgba(1,87,155,0.2)' if edu != highlight_job else '' for edu in fig.data[0]['labels']]),
+            )
+        else:
+            filtered_df = lastest_df[lastest_df['產業別'] == f'{selected_value}']
+            fig = px.pie(filtered_df, values='信用卡交易金額', names='職業類別', title=f'{selected_value} / 各職業類別信用卡交易金額分布')
+    return fig
     
 @dash2.callback(
     Output("graph_line", "figure"),
@@ -243,32 +247,28 @@ def update_line_chart(selected_job):
         monthly_total = lastest_df.groupby(['年', '月', '職業類別'])['信用卡交易金額'].sum().reset_index()
 
         # 繪製折線圖
-        fig = px.line(monthly_total, x="月", y="信用卡交易金額", color="職業類別", title='每月信用卡消費金額變化', markers=True)
-
-        return fig
+        fig = px.line(monthly_total, x="月", y="信用卡交易金額", color="職業類別", title='各職業類別每月信用卡交易金額趨勢', markers=True)
     else:
         monthly_total = lastest_df.groupby(['年', '月', '職業類別'])['信用卡交易金額'].sum().reset_index()
         filtered_df = monthly_total[monthly_total['職業類別'] == f'{selected_job}']
         print(filtered_df)
-        fig = px.line(filtered_df, x="月", y="信用卡交易金額", color="職業類別", title='每月信用卡消費金額變化', markers=True)
-        return fig
+        fig = px.line(filtered_df, x="月", y="信用卡交易金額", color="職業類別", title=f'{selected_job}每月信用卡交易金額趨勢', markers=True)
+    return fig
 
 @dash2.callback(
     Output("graph_bar", "figure"),
     Input("area","value")
 )
-def update_line_chart(selected_area):
+def update_bar_chart(selected_area):
     global lastest_df
     if selected_area is None or selected_area == "ALL":
         region_sum = lastest_df.groupby('地區')['信用卡交易金額'].sum().reset_index()
 
-        fig = px.bar(region_sum, x='地區', y='信用卡交易金額', title='Total Credit Card Transaction Amount by Region')
-
-        return fig
+        fig = px.bar(region_sum, x='地區', y='信用卡交易金額', title='各地區信用卡交易金額')
     else:
         region_sum = lastest_df.groupby('地區')['信用卡交易金額'].sum().reset_index()
 
-        fig = px.bar(region_sum, x='地區', y='信用卡交易金額', title='Total Credit Card Transaction Amount by Region')
+        fig = px.bar(region_sum, x='地區', y='信用卡交易金額', title=f'{selected_area}信用卡交易金額')
         highlighted_region = selected_area
-        fig.update_traces(marker_color=['blue' if region == highlighted_region else 'gray' for region in region_sum['地區']])
-        return fig
+        fig.update_traces(marker_color=['rgba(1,87,155,0.2)' if region != highlighted_region else 'blue' for region in region_sum['地區']])
+    return fig
