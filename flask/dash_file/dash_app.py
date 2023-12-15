@@ -228,8 +228,10 @@ def update_pie_chart(selected_value, selected_edu_value):
         filtered_df = lastest_df[lastest_df['產業別'] == f'{selected_value}']
         fig = px.pie(filtered_df, values='信用卡交易金額', names='教育程度')
         highlighted_edu = selected_edu_value
-        pull_values = [0.2 if edu == highlighted_edu else 0 for edu in fig.data[0]['labels']]
-        fig.update_traces(pull=pull_values)
+        opacity_values = [0.2 if edu == highlighted_edu else 1 for edu in fig.data[0]['labels']]
+        fig.update_traces(
+            marker=dict(colors=['rgba(31,119,180,' + str(opacity) + ')' for opacity in opacity_values]),
+            textinfo='percent+label',)
         return fig
     
 @dash.callback(
