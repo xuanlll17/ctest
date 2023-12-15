@@ -40,7 +40,7 @@ dash2.layout = html.Div(
                                     "年齡層", href="/dash/app1/", external_link=True
                                 ),
                                 dbc.DropdownMenuItem(
-                                    "兩性", href="/dash/app3/", external_link=True
+                                    "性別", href="/dash/app3/", external_link=True
                                 ),
                                 dbc.DropdownMenuItem(
                                     "年收入", href="/dash/app4/", external_link=True

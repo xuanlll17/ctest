@@ -9,7 +9,6 @@ import socket
 myip = socket.gethostbyname(socket.gethostname())
 if '172.17.0.0' <= myip <= '172.17.255.255':
     from . import password as pw
-    print("本機")
     DATABASE = pw.DATABASE
     USER = pw.USER
     PASSWORD = pw.PASSWORD
@@ -19,8 +18,6 @@ else:
     USER = os.environ['USER']
     PASSWORD = os.environ['PASSWORD']
     HOST = os.environ['HOST']
-
-print(f'我的ip{myip}')
 
 def __download_creditcard_data():
     edu_url = (

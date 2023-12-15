@@ -43,7 +43,7 @@ dash1.layout = html.Div(
                                 ),
 
                                 dbc.DropdownMenuItem(
-                                    "兩性", href="/dash/app3/", external_link=True
+                                    "性別", href="/dash/app3/", external_link=True
                                 ),
 
                                 dbc.DropdownMenuItem(
@@ -269,7 +269,7 @@ def update_line_chart(selected_age):
     Output("graph_bar", "figure"),
     Input("area","value")
 )
-def update_line_chart(selected_area):
+def update_bar_chart(selected_area):
     global lastest_df
     if selected_area is None or selected_area == "ALL":
         region_sum = lastest_df.groupby('地區')['信用卡交易金額'].sum().reset_index()

@@ -43,7 +43,7 @@ dash4.layout = html.Div(
                                     "職業類別", href="/dash/app2/", external_link=True
                                 ),
                                 dbc.DropdownMenuItem(
-                                    "兩性", href="/dash/app3/", external_link=True
+                                    "性別", href="/dash/app3/", external_link=True
                                 ),
                             ],
                             color="danger",

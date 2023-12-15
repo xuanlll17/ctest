@@ -41,7 +41,7 @@ dash.layout = html.Div(
                                     "職業類別", href="/dash/app2/", external_link=True
                                 ),
                                 dbc.DropdownMenuItem(
-                                    "兩性", href="/dash/app3/", external_link=True
+                                    "性別", href="/dash/app3/", external_link=True
                                 ),
                                 dbc.DropdownMenuItem(
                                     "年收入", href="/dash/app4/", external_link=True
@@ -223,16 +223,19 @@ def update_pie_chart(selected_value, selected_edu_value):
     if selected_value is None or selected_value == "ALL":
         industry_sum = lastest_df.groupby('產業別')['信用卡交易金額'].sum().reset_index()
         fig = px.pie(industry_sum, values='信用卡交易金額', names='產業別', title='各產業別信用卡交易金額總和')
-        return fig
     else:
-        filtered_df = lastest_df[lastest_df['產業別'] == f'{selected_value}']
-        fig = px.pie(filtered_df, values='信用卡交易金額', names='教育程度')
-        highlighted_edu = selected_edu_value
-        opacity_values = [0.2 if edu == highlighted_edu else 1 for edu in fig.data[0]['labels']]
-        fig.update_traces(
-            marker=dict(colors=['rgba(31,119,180,' + str(opacity) + ')' for opacity in opacity_values]),
-            textinfo='percent+label',)
-        return fig
+        if selected_edu_value != 'ALL':
+            filtered_df = lastest_df[lastest_df['產業別'] == f'{selected_value}']
+            fig = px.pie(filtered_df, values='信用卡交易金額', names='教育程度')
+            highlighted_edu = selected_edu_value
+            opacity_values = [1 if edu == highlighted_edu else 0.1 for edu in fig.data[0]['labels']]
+            fig.update_traces(
+                marker=dict(colors=['rgba(0,0,255,' + str(opacity) + ')' for opacity in opacity_values]),
+            )
+        else:
+            filtered_df = lastest_df[lastest_df['產業別'] == f'{selected_value}']
+            fig = px.pie(filtered_df, values='信用卡交易金額', names='教育程度')
+    return fig
     
 @dash.callback(
     Output("graph_line", "figure"),
@@ -246,33 +249,29 @@ def update_line_chart(selected_edu):
 
         # 繪製折線圖
         fig = px.line(monthly_total, x="月", y="信用卡交易金額", color="教育程度", title='每月信用卡消費金額變化', markers=True)
-
-        return fig
     else:
         monthly_total = lastest_df.groupby(['年', '月', '教育程度'])['信用卡交易金額'].sum().reset_index()
         filtered_df = monthly_total[monthly_total['教育程度'] == f'{selected_edu}']
         print(filtered_df)
         fig = px.line(filtered_df, x="月", y="信用卡交易金額", color="教育程度", title='每月信用卡消費金額變化', markers=True)
-        return fig
+    return fig
 
 @dash.callback(
     Output("graph_bar", "figure"),
     Input("area","value")
 )
-def update_line_chart(selected_area):
+def update_bar_chart(selected_area):
     global lastest_df
     if selected_area is None or selected_area == "ALL":
         region_sum = lastest_df.groupby('地區')['信用卡交易金額'].sum().reset_index()
 
         fig = px.bar(region_sum, x='地區', y='信用卡交易金額', title='Total Credit Card Transaction Amount by Region')
-
-        return fig
     else:
         region_sum = lastest_df.groupby('地區')['信用卡交易金額'].sum().reset_index()
 
         fig = px.bar(region_sum, x='地區', y='信用卡交易金額', title='Total Credit Card Transaction Amount by Region')
         highlighted_region = selected_area
         fig.update_traces(marker_color=['blue' if region == highlighted_region else 'gray' for region in region_sum['地區']])
-        return fig
+    return fig
 
 
