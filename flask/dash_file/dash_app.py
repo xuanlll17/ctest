@@ -163,7 +163,10 @@ dash.layout = html.Div(
                     style={"paddingTop": "2rem"},
                 ),
                 html.Div([
-                    dcc.Graph(id="graph"),
+                    html.Div([
+                        dcc.Graph(id="graph"),
+                        dcc.Graph(id="graph_horBar")
+                    ]),
                     dcc.Graph(id="graph_line"),
                     dcc.Graph(id="graph_bar"),
                 ]),
