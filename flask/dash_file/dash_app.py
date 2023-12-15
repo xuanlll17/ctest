@@ -165,7 +165,7 @@ dash.layout = html.Div(
                 html.Div([
                     html.Div([
                         dcc.Graph(id="graph"),
-                        dcc.Graph(id="graph_horBar")
+                        dcc.Graph(id="graph_sunburst")
                     ]),
                     dcc.Graph(id="graph_line"),
                     dcc.Graph(id="graph_bar"),
