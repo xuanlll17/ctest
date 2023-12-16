@@ -213,10 +213,10 @@ def update_table(selected_area, selected_month, selected_industry, selected_age)
     filtered_data = [
         row
         for row in lastest_data
-        if (selected_area is None or selected_area == "ALL" or row[2] == selected_area)
-        and (selected_month is None or selected_month == "ALL" or str(row[1]) == selected_month)
-        and (selected_industry is None or selected_industry == "ALL" or row[3] == selected_industry)
-        and (selected_age is None or selected_age == "ALL" or str(row[4]) == selected_age)
+        if (selected_area == "ALL" or row[2] == selected_area)
+        and (selected_month == "ALL" or str(row[1]) == selected_month)
+        and (selected_industry == "ALL" or row[3] == selected_industry)
+        and (selected_age == "ALL" or str(row[4]) == selected_age)
     ]
 
     update_df = pd.DataFrame(
@@ -234,7 +234,7 @@ def update_pie_chart(selected_value, selected_age_value):
         industry_sum = lastest_df.groupby('產業別')['信用卡交易金額'].sum().reset_index()
         fig = px.pie(industry_sum, values='信用卡交易金額', names='產業別', title='各產業別信用卡交易金額分布', height=500)
     else:
-        if selected_age_value != 'ALL':
+        if selected_age_value != "ALL":
             filtered_df = lastest_df[lastest_df['產業別'] == f'{selected_value}']
             fig = px.pie(filtered_df, values='信用卡交易金額', names='年齡層',title=f'{selected_value} / {selected_age_value} 信用卡交易金額占比', height=500)
             highlight_age = selected_age_value
@@ -254,7 +254,6 @@ def update_line_chart(selected_age):
     global lastest_df
     if selected_age == "ALL":
         monthly_total = lastest_df.groupby(['年', '月', '年齡層'])['信用卡交易金額'].sum().reset_index()
-
         fig = px.line(monthly_total, x="月", y="信用卡交易金額", color="年齡層", title='各年齡層每月信用卡交易金額趨勢', markers=True, height=450)
     else:
         monthly_total = lastest_df.groupby(['年', '月', '年齡層'])['信用卡交易金額'].sum().reset_index()
@@ -271,7 +270,6 @@ def update_bar_chart(selected_area):
     global lastest_df
     if selected_area == "ALL":
         region_sum = lastest_df.groupby('地區')['信用卡交易金額'].sum().reset_index()
-
         fig = px.bar(region_sum, x='地區', y='信用卡交易金額', title='各地區信用卡交易金額', height=450)
     else:
         region_sum = lastest_df.groupby('地區')['信用卡交易金額'].sum().reset_index()

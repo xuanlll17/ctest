@@ -279,13 +279,24 @@ def update_bar_chart(selected_area):
 def update_sunburst_chart(selected_mon,selected_ar,selected_ind):
     global lastest_df
     if selected_mon == "ALL" and selected_ar == "ALL" and selected_ind == "ALL":
-        fig = px.sunburst(lastest_df, path=['年', '月', '地區', '產業別', '年齡層'], values='信用卡交易金額', title='2023年各教育程度信用卡交易分布', height=500)
+        fig = px.sunburst(lastest_df, path=['年', '月', '地區', '產業別', '教育程度'], values='信用卡交易金額', title='2023年各教育程度信用卡交易分布', height=500)
     elif selected_mon != "ALL" and selected_ar == "ALL" and selected_ind == "ALL":
         filtered_df = lastest_df[lastest_df['月'].astype(str) == selected_mon]
-        fig = px.sunburst(filtered_df, path=['月', '地區', '產業別', '年齡層'], values='信用卡交易金額',title=f'{selected_mon}月信用卡交易分布', height=500)
-    else:
+        fig = px.sunburst(filtered_df, path=['月', '地區', '產業別', '教育程度'], values='信用卡交易金額',title=f'{selected_mon}月信用卡交易分布', height=500)
+    elif (selected_mon == "ALL" and selected_ar != "ALL" and selected_ind == "ALL"):
+        filtered_df = lastest_df[lastest_df['地區'] == selected_ar]
+        fig = px.sunburst(filtered_df, path=['地區', '產業別', '教育程度'], values='信用卡交易金額',title=f'{selected_ar} / 各教育程度信用卡交易分布', height=500)
+    elif (selected_mon == "ALL" and selected_ar != "ALL" and selected_ind != "ALL"):
+        filtered_df = lastest_df[(lastest_df['地區'] == selected_ar) & (lastest_df['產業別'] == selected_ind)]
+        fig = px.sunburst(filtered_df, path=['地區', '產業別', '教育程度'], values='信用卡交易金額',title=f'{selected_ar} / {selected_ind} / 各教育程度信用卡交易分布', height=500)
+    elif selected_mon != "ALL" and selected_ar != "ALL" and selected_ind == "ALL":
         filtered_df = lastest_df[(lastest_df['月'].astype(str) == selected_mon) & (lastest_df['地區'] == selected_ar)]
-        fig = px.sunburst(filtered_df, path=['地區', '教育程度'], values='信用卡交易金額',title=f'{selected_ar} / 各教育程度信用卡交易分布')
+        print(filtered_df)
+        fig = px.sunburst(filtered_df, path=['地區', '產業別', '教育程度'], values='信用卡交易金額',title=f'{selected_mon}月 / {selected_ar} / 各教育程度信用卡交易分布', height=500)
+    else:
+        filtered_df = lastest_df[(lastest_df['月'].astype(str) == selected_mon) & (lastest_df['地區'] == selected_ar) & (lastest_df['產業別'] == selected_ind)]
+        print(filtered_df)
+        fig = px.sunburst(filtered_df, path=['產業別', '教育程度'], values='信用卡交易金額',title=f'{selected_mon}月 / {selected_ar} / {selected_ind} / 各教育程度信用卡交易分布', height=500)
     return fig
 
 
