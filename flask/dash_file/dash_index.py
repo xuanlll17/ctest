@@ -5,12 +5,12 @@ from . import data
 import plotly.express as px
 
 dash_index = Dash(
-    requests_pathname_prefix="/dash/index/", external_stylesheets=[dbc.themes.BOOTSTRAP]
+    requests_pathname_prefix="/dash/index/", external_stylesheets=[dbc.themes.QUARTZ]
 )
 dash_index.title = "信用卡消費樣態"
-lastest_data = data.sex_data()
+lastest_data = data.age_data()
 lastest_df = pd.DataFrame(
-    lastest_data, columns=["年", "月", "地區", "產業別", "性別", "信用卡交易筆數", "信用卡交易金額"]
+    lastest_data, columns=["年", "月", "地區", "產業別", "年齡層", "信用卡交易筆數", "信用卡交易金額"]
 )
 
 dash_index.layout = html.Div(
@@ -20,7 +20,7 @@ dash_index.layout = html.Div(
                 html.Div(
                     [html.Div([html.H1("信用卡消費樣態")], className="col text-center")],
                     className="row",
-                    style={"paddingTop": "2rem"},
+                    style={"padding": "3.3rem 0 1.5rem 0"},
                 ),
                 html.Div([
                     dcc.Graph(id="graph_line"),
@@ -34,7 +34,7 @@ dash_index.layout = html.Div(
                         dbc.Button("年收入", color="danger", className="me-4", href="/dash/app4/", external_link=True),
                     ],
                     className="d-flex justify-content-center",
-                    style={"paddingTop": "2rem"},
+                    style={"paddingTop": "2.5rem"},
                 ),
 
             ]
@@ -49,13 +49,18 @@ dash_index.layout = html.Div(
 )
 def line_chart(graph_id):
     global lastest_df
-    
-    monthly_total = lastest_df.groupby(['年', '月', '性別'])['信用卡交易金額'].sum().reset_index()
-
-    fig = px.line(monthly_total, x="月", y="信用卡交易金額", color="性別", markers=True)
-
-    # Hide the legend
-    fig.update_layout(showlegend=False)
+    monthly_total = lastest_df.groupby(['年', '月'])['信用卡交易金額'].sum().reset_index()
+    fig = px.line(monthly_total, x="月", y="信用卡交易金額", color="年", markers=True)
+    for trace in fig.data:
+        trace.line.color = 'goldenrod'
+        trace.line.width = 2.5
+    fig.update_layout({
+        'plot_bgcolor': 'rgba(0, 0, 0, 0)',
+        'paper_bgcolor': 'rgba(0, 0, 0, 0.1)',
+        },
+        showlegend=False,
+        xaxis={'showgrid': False, 'color':'white'},
+        yaxis={'showgrid': True, 'color':'white'})
     return fig
 
 
