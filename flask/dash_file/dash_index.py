@@ -20,23 +20,22 @@ dash_index.layout = html.Div(
                 html.Div(
                     [html.Div([html.H1("信用卡消費樣態")], className="col text-center")],
                     className="row",
-                    style={"padding": "3.3rem 0 1.5rem 0"},
+                    style={"padding": "3rem 0 1rem 0"},
                 ),
                 html.Div([
                     dcc.Graph(id="graph_line"),
                 ]),
                 html.Div(
                     [
-                        dbc.Button("教育程度", color="primary", className="me-4", href="/dash/app/", external_link=True),
-                        dbc.Button("年齡層", color="secondary", className="me-4", href="/dash/app1/", external_link=True),
-                        dbc.Button("職業類別", color="success", className="me-4", href="/dash/app2/", external_link=True),
-                        dbc.Button("性別", color="warning", className="me-4", href="/dash/app3/", external_link=True),
-                        dbc.Button("年收入", color="danger", className="me-4", href="/dash/app4/", external_link=True),
+                        dbc.Button("教育程度", color="primary", className="me-4", href="/dash/app/", external_link=True, style={"fontWeight": "bold"}),
+                        dbc.Button("年齡層", color="secondary", className="me-4", href="/dash/app1/", external_link=True, style={"fontWeight": "bold"}),
+                        dbc.Button("職業類別", color="success", className="me-4", href="/dash/app2/", external_link=True, style={"fontWeight": "bold"}),
+                        dbc.Button("性別", color="warning", className="me-4", href="/dash/app3/", external_link=True, style={"fontWeight": "bold"}),
+                        dbc.Button("年收入", color="danger", className="me-4", href="/dash/app4/", external_link=True, style={"fontWeight": "bold"}),
                     ],
                     className="d-flex justify-content-center",
                     style={"paddingTop": "2.5rem"},
                 ),
-
             ]
         )
     ],
