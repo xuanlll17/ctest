@@ -216,7 +216,7 @@ def update_table(selected_area, selected_month, selected_industry, selected_age)
         if (selected_area == "ALL" or row[2] == selected_area)
         and (selected_month == "ALL" or str(row[1]) == selected_month)
         and (selected_industry == "ALL" or row[3] == selected_industry)
-        and (selected_age == "ALL" or str(row[4]) == selected_age)
+        and (selected_age == "ALL" or row[4] == selected_age)
     ]
 
     update_df = pd.DataFrame(
