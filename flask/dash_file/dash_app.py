@@ -166,7 +166,7 @@ dash.layout = html.Div(
                     html.Div([
                         dcc.Graph(id="graph"),
                         dcc.Graph(id="graph_sunburst")
-                    ]),
+                    ],style={'display': 'flex'}),
                     dcc.Graph(id="graph_line"),
                     dcc.Graph(id="graph_bar"),
                 ]),
@@ -271,6 +271,22 @@ def update_bar_chart(selected_area):
         fig = px.bar(region_sum, x='地區', y='信用卡交易金額', title=f'{selected_area}信用卡交易金額')
         highlighted_region = selected_area
         fig.update_traces(marker_color=['rgba(1,87,155,0.2)' if region != highlighted_region else 'blue' for region in region_sum['地區']])
+    return fig
+
+@dash.callback(
+    Output("graph_sunburst", "figure"),
+    [Input("month","value"),Input("area","value")]
+)
+def update_sunburst_chart(selected_mon,selected_ar):
+    global lastest_df
+    if selected_mon == "ALL":
+        fig = px.sunburst(lastest_df, path=['年','月', '地區', '教育程度'], values='信用卡交易金額',title='2023年各教育程度信用卡交易分布')
+    elif selected_mon != "ALL" and selected_ar == "ALL":
+        filtered_df = lastest_df[lastest_df['月'].astype(str) == selected_mon]
+        fig = px.sunburst(filtered_df, path=['月', '地區', '教育程度'], values='信用卡交易金額',title=f'{selected_mon}月信用卡交易分布')
+    else:
+        filtered_df = lastest_df[(lastest_df['月'].astype(str) == selected_mon) & (lastest_df['地區'] == selected_ar)]
+        fig = px.sunburst(filtered_df, path=['地區', '教育程度'], values='信用卡交易金額',title=f'{selected_ar} / 各教育程度信用卡交易分布')
     return fig
 
 
