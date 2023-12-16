@@ -55,26 +55,6 @@ dash1.layout = html.Div(
                         ),
                         dbc.InputGroup(
                             [
-                                dbc.InputGroupText("地區"),
-                                dbc.Select(
-                                    id="area",
-                                    value="ALL",
-                                    options=[
-                                        {"label": "臺北市", "value": "臺北市"},
-                                        {"label": "新北市", "value": "新北市"},
-                                        {"label": "桃園市", "value": "桃園市"},
-                                        {"label": "臺中市", "value": "臺中市"},
-                                        {"label": "臺南市", "value": "臺南市"},
-                                        {"label": "高雄市", "value": "高雄市"},
-                                        {"label": "ALL", "value": "ALL"},
-                                    ],
-                                    style={"marginRight": "1rem"},
-                                ),
-                            ],
-                     
-                        ),
-                        dbc.InputGroup(
-                            [
                                 dbc.InputGroupText("月份"),
                                 dbc.Select(
                                     id="month",
@@ -94,9 +74,27 @@ dash1.layout = html.Div(
                                     style={"marginRight": "1rem"},
                                 ),
                             ],
-                        
                         ),
-                         dbc.InputGroup(
+                        dbc.InputGroup(
+                            [
+                                dbc.InputGroupText("地區"),
+                                dbc.Select(
+                                    id="area",
+                                    value="ALL",
+                                    options=[
+                                        {"label": "臺北市", "value": "臺北市"},
+                                        {"label": "新北市", "value": "新北市"},
+                                        {"label": "桃園市", "value": "桃園市"},
+                                        {"label": "臺中市", "value": "臺中市"},
+                                        {"label": "臺南市", "value": "臺南市"},
+                                        {"label": "高雄市", "value": "高雄市"},
+                                        {"label": "ALL", "value": "ALL"},
+                                    ],
+                                    style={"marginRight": "1rem"},
+                                ),
+                            ],
+                        ),
+                        dbc.InputGroup(
                             [
                                 dbc.InputGroupText("產業別"),
                                 dbc.Select(
@@ -114,7 +112,6 @@ dash1.layout = html.Div(
                                     style={"marginRight": "1rem"},
                                 ),
                             ],
-       
                         ),
                         dbc.InputGroup(
                             [
@@ -140,7 +137,6 @@ dash1.layout = html.Div(
                                     ],
                                 ),
                             ],
-                          
                         )
                     ],
                     className="d-flex justify-content-center",
@@ -175,10 +171,15 @@ dash1.layout = html.Div(
                     style={"paddingTop": "2rem"},
                 ),
                 html.Div([
-                    dcc.Graph(id="graph"),
-                    dcc.Graph(id="graph_line"),
-                    dcc.Graph(id="graph_bar"),
-                ]),
+                    html.Div(
+                        [
+                            dcc.Graph(id="graph", style={'flex': '5'}),
+                            dcc.Graph(id="graph_sunburst", style={'flex': '5'}),
+                        ], style={'display': 'flex', 'flexWrap': 'wrap', "paddingTop": "2rem"}),
+                        dcc.Graph(id="graph_line"),
+                        dcc.Graph(id="graph_bar"),
+                    ],
+                ),
                 html.Div(
                     [
                         html.Div(
@@ -209,7 +210,6 @@ dash1.layout = html.Div(
     [Input("area", "value"), Input("month", "value"), Input("industry", "value"), Input("age", "value")],
 )
 def update_table(selected_area, selected_month, selected_industry, selected_age):
-    print(selected_area, selected_industry, selected_month, selected_age)
     filtered_data = [
         row
         for row in lastest_data
@@ -222,8 +222,6 @@ def update_table(selected_area, selected_month, selected_industry, selected_age)
     update_df = pd.DataFrame(
         filtered_data, columns=["年", "月", "地區", "產業別", "年齡層", "信用卡交易筆數", "信用卡交易金額"]
     )
-
-    print(update_df)
     return update_df.to_dict("records")
 
 @dash1.callback(
@@ -232,20 +230,20 @@ def update_table(selected_area, selected_month, selected_industry, selected_age)
 )
 def update_pie_chart(selected_value, selected_age_value):
     global lastest_df
-    if selected_value is None or selected_value == "ALL":
+    if selected_value == "ALL":
         industry_sum = lastest_df.groupby('產業別')['信用卡交易金額'].sum().reset_index()
-        fig = px.pie(industry_sum, values='信用卡交易金額', names='產業別', title='各產業別信用卡交易金額分布')
+        fig = px.pie(industry_sum, values='信用卡交易金額', names='產業別', title='各產業別信用卡交易金額分布', height=500)
     else:
         if selected_age_value != 'ALL':
             filtered_df = lastest_df[lastest_df['產業別'] == f'{selected_value}']
-            fig = px.pie(filtered_df, values='信用卡交易金額', names='年齡層',title=f'{selected_value} / {selected_age_value} 信用卡交易金額占比')
+            fig = px.pie(filtered_df, values='信用卡交易金額', names='年齡層',title=f'{selected_value} / {selected_age_value} 信用卡交易金額占比', height=500)
             highlight_age = selected_age_value
             fig.update_traces(
                 marker=dict(colors=['rgba(1,87,155,0.2)' if age != highlight_age else '' for age in fig.data[0]['labels']]),
             )
         else:
             filtered_df = lastest_df[lastest_df['產業別'] == f'{selected_value}']
-            fig = px.pie(filtered_df, values='信用卡交易金額', names='年齡層', title=f'{selected_value} / 各年齡層信用卡交易金額分布')
+            fig = px.pie(filtered_df, values='信用卡交易金額', names='年齡層', title=f'{selected_value} / 各年齡層信用卡交易金額分布', height=500)
     return fig
     
 @dash1.callback(
@@ -254,17 +252,15 @@ def update_pie_chart(selected_value, selected_age_value):
 )
 def update_line_chart(selected_age):
     global lastest_df
-    if selected_age is None or selected_age == "ALL":
-        # 將資料按照年和月進行分組，計算每個月的信用卡消費金額總和
+    if selected_age == "ALL":
         monthly_total = lastest_df.groupby(['年', '月', '年齡層'])['信用卡交易金額'].sum().reset_index()
 
-        # 繪製折線圖
-        fig = px.line(monthly_total, x="月", y="信用卡交易金額", color="年齡層", title='各年齡層每月信用卡交易金額趨勢', markers=True)
+        fig = px.line(monthly_total, x="月", y="信用卡交易金額", color="年齡層", title='各年齡層每月信用卡交易金額趨勢', markers=True, height=450)
     else:
         monthly_total = lastest_df.groupby(['年', '月', '年齡層'])['信用卡交易金額'].sum().reset_index()
         filtered_df = monthly_total[monthly_total['年齡層'] == f'{selected_age}']
         print(filtered_df)
-        fig = px.line(filtered_df, x="月", y="信用卡交易金額", color="年齡層", title=f'{selected_age}每月信用卡交易金額趨勢', markers=True)
+        fig = px.line(filtered_df, x="月", y="信用卡交易金額", color="年齡層", title=f'{selected_age}每月信用卡交易金額趨勢', markers=True, height=450)
     return fig
 
 @dash1.callback(
@@ -273,14 +269,41 @@ def update_line_chart(selected_age):
 )
 def update_bar_chart(selected_area):
     global lastest_df
-    if selected_area is None or selected_area == "ALL":
+    if selected_area == "ALL":
         region_sum = lastest_df.groupby('地區')['信用卡交易金額'].sum().reset_index()
 
-        fig = px.bar(region_sum, x='地區', y='信用卡交易金額', title='各地區信用卡交易金額')
+        fig = px.bar(region_sum, x='地區', y='信用卡交易金額', title='各地區信用卡交易金額', height=450)
     else:
         region_sum = lastest_df.groupby('地區')['信用卡交易金額'].sum().reset_index()
 
-        fig = px.bar(region_sum, x='地區', y='信用卡交易金額', title=f'{selected_area}信用卡交易金額')
+        fig = px.bar(region_sum, x='地區', y='信用卡交易金額', title=f'{selected_area}信用卡交易金額', height=450)
         highlighted_region = selected_area
         fig.update_traces(marker_color=['rgba(1,87,155,0.2)' if region != highlighted_region else 'blue' for region in region_sum['地區']])
+    return fig
+
+@dash1.callback(
+    Output("graph_sunburst", "figure"),
+    [Input("month","value"),Input("area","value"),Input("industry","value")]
+)
+def update_sunburst_chart(selected_mon,selected_ar,selected_ind):
+    global lastest_df
+    if selected_mon == "ALL" and selected_ar == "ALL" and selected_ind == "ALL":
+        fig = px.sunburst(lastest_df, path=['年', '月', '地區', '產業別', '年齡層'], values='信用卡交易金額', title='2023年各年齡層信用卡交易分布', height=500)
+    elif selected_mon != "ALL" and selected_ar == "ALL" and selected_ind == "ALL":
+        filtered_df = lastest_df[lastest_df['月'].astype(str) == selected_mon]
+        fig = px.sunburst(filtered_df, path=['月', '地區', '產業別', '年齡層'], values='信用卡交易金額',title=f'{selected_mon}月信用卡交易分布', height=500)
+    elif (selected_mon == "ALL" and selected_ar != "ALL" and selected_ind == "ALL"):
+        filtered_df = lastest_df[lastest_df['地區'] == selected_ar]
+        fig = px.sunburst(filtered_df, path=['地區', '產業別', '年齡層'], values='信用卡交易金額',title=f'{selected_ar} / 各年齡層信用卡交易分布', height=500)
+    elif (selected_mon == "ALL" and selected_ar != "ALL" and selected_ind != "ALL"):
+        filtered_df = lastest_df[(lastest_df['地區'] == selected_ar) & (lastest_df['產業別'] == selected_ind)]
+        fig = px.sunburst(filtered_df, path=['地區', '產業別', '年齡層'], values='信用卡交易金額',title=f'{selected_ar} / {selected_ind} / 各年齡層信用卡交易分布', height=500)
+    elif selected_mon != "ALL" and selected_ar != "ALL" and selected_ind == "ALL":
+        filtered_df = lastest_df[(lastest_df['月'].astype(str) == selected_mon) & (lastest_df['地區'] == selected_ar)]
+        print(filtered_df)
+        fig = px.sunburst(filtered_df, path=['地區', '產業別', '年齡層'], values='信用卡交易金額',title=f'{selected_mon}月 / {selected_ar} / 各年齡層信用卡交易分布', height=500)
+    else:
+        filtered_df = lastest_df[(lastest_df['月'].astype(str) == selected_mon) & (lastest_df['地區'] == selected_ar) & (lastest_df['產業別'] == selected_ind)]
+        print(filtered_df)
+        fig = px.sunburst(filtered_df, path=['產業別', '年齡層'], values='信用卡交易金額',title=f'{selected_mon}月 / {selected_ar} / {selected_ind} / 各年齡層信用卡交易分布', height=500)
     return fig
