@@ -258,7 +258,6 @@ def update_line_chart(selected_age):
     else:
         monthly_total = lastest_df.groupby(['年', '月', '年齡層'])['信用卡交易金額'].sum().reset_index()
         filtered_df = monthly_total[monthly_total['年齡層'] == f'{selected_age}']
-        print(filtered_df)
         fig = px.line(filtered_df, x="月", y="信用卡交易金額", color="年齡層", title=f'{selected_age}每月信用卡交易金額趨勢', markers=True, height=450)
     return fig
 
@@ -273,7 +272,6 @@ def update_bar_chart(selected_area):
         fig = px.bar(region_sum, x='地區', y='信用卡交易金額', title='各地區信用卡交易金額', height=450)
     else:
         region_sum = lastest_df.groupby('地區')['信用卡交易金額'].sum().reset_index()
-
         fig = px.bar(region_sum, x='地區', y='信用卡交易金額', title=f'{selected_area}信用卡交易金額', height=450)
         highlighted_region = selected_area
         fig.update_traces(marker_color=['rgba(1,87,155,0.2)' if region != highlighted_region else 'blue' for region in region_sum['地區']])
