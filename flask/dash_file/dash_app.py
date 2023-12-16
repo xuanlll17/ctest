@@ -219,7 +219,7 @@ def update_table(selected_area, selected_month, selected_industry, selected_educ
 )
 def update_pie_chart(selected_value, selected_edu_value):
     global lastest_df
-    if selected_value is None or selected_value == "ALL":
+    if selected_value == "ALL":
         industry_sum = lastest_df.groupby('產業別')['信用卡交易金額'].sum().reset_index()
         fig = px.pie(industry_sum, values='信用卡交易金額', names='產業別', title='各產業別信用卡交易金額分布', height=500)
     else:
@@ -247,7 +247,6 @@ def update_line_chart(selected_edu):
     else:
         monthly_total = lastest_df.groupby(['年', '月', '教育程度'])['信用卡交易金額'].sum().reset_index()
         filtered_df = monthly_total[monthly_total['教育程度'] == f'{selected_edu}']
-        print(filtered_df)
         fig = px.line(filtered_df, x="月", y="信用卡交易金額", color="教育程度", title=f'{selected_edu}每月信用卡交易金額趨勢', markers=True, height=450)
     return fig
 
@@ -257,7 +256,7 @@ def update_line_chart(selected_edu):
 )
 def update_bar_chart(selected_area):
     global lastest_df
-    if selected_area is None or selected_area == "ALL":
+    if selected_area == "ALL":
         region_sum = lastest_df.groupby('地區')['信用卡交易金額'].sum().reset_index()
         fig = px.bar(region_sum, x='地區', y='信用卡交易金額', title='各地區信用卡交易金額', height=450)
     else:
