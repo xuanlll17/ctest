@@ -8,7 +8,7 @@ dash = Dash(
     requests_pathname_prefix="/dash/app/", external_stylesheets=[dbc.themes.BOOTSTRAP]
 )
 dash.title = "信用卡消費樣態"
-lastest_data = data.edu_data()
+lastest_data = data.search_data(dataName="教育程度",tableName="edu")
 
 
 lastest_df = pd.DataFrame(
@@ -285,7 +285,6 @@ def update_sunburst_chart(selected_mon,selected_ar,selected_ind):
         fig = px.sunburst(filtered_df, path=['地區', '產業別', '教育程度'], values='信用卡交易金額',title=f'{selected_ar} / {selected_ind} 信用卡交易分布', height=500)
     elif selected_mon != "ALL" and selected_ar != "ALL" and selected_ind == "ALL":
         filtered_df = lastest_df[(lastest_df['月'].astype(str) == selected_mon) & (lastest_df['地區'] == selected_ar)]
-        print(filtered_df)
         fig = px.sunburst(filtered_df, path=['地區', '產業別', '教育程度'], values='信用卡交易金額',title=f'{selected_mon}月 / {selected_ar} 信用卡交易分布', height=500)
     elif selected_mon != "ALL" and selected_ar == "ALL" and selected_ind != "ALL":
         filtered_df = lastest_df[(lastest_df['月'].astype(str) == selected_mon) & (lastest_df['產業別'] == selected_ind)]

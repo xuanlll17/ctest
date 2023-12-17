@@ -8,7 +8,7 @@ dash3 = Dash(
     requests_pathname_prefix="/dash/app3/", external_stylesheets=[dbc.themes.BOOTSTRAP]
 )
 dash3.title = "信用卡消費樣態"
-lastest_data = data.sex_data()
+lastest_data = data.search_data(dataName="性別",tableName="sex")
 
 
 lastest_df = pd.DataFrame(

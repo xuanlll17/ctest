@@ -8,7 +8,7 @@ dash4 = Dash(
     requests_pathname_prefix="/dash/app4/", external_stylesheets=[dbc.themes.BOOTSTRAP]
 )
 dash4.title = "信用卡消費樣態"
-lastest_data = data.incom_data()
+lastest_data = data.search_data(dataName="年收入",tableName="incom")
 
 
 lastest_df = pd.DataFrame(
