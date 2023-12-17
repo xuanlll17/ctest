@@ -21,5 +21,8 @@
 ## 專題目的
 依性別、職業、年齡層、教育程度及年收入等多方面因素進行分析，透過資料視覺化呈現消費者使用信用卡的消費習慣性與趨勢。
 ## 資料說明
-1. 資料來源：聯合信用卡處理中心Open API、Image by toffeomurice from Pixabay
+1. 資料來源：  
+    - data：聯合信用卡處理中心Open API
+    - icon：Image by [toffeomurice](https://pixabay.com/users/toffeomurice-3735734/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=2761073) from [Pixabay](https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=2761073)
+
 2. 資料範圍：2023年1月－2023年9月
