@@ -27,11 +27,11 @@ dash_index.layout = html.Div(
                 ]),
                 html.Div(
                     [
-                        dbc.Button("教育程度", color="primary", className="me-4", href="/dash/app/", external_link=True, style={"fontWeight": "bold"}),
+                        dbc.Button("教育程度", color="info", className="me-4", href="/dash/app/", external_link=True, style={"fontWeight": "bold"}),
                         dbc.Button("年齡層", color="secondary", className="me-4", href="/dash/app1/", external_link=True, style={"fontWeight": "bold"}),
                         dbc.Button("職業類別", color="success", className="me-4", href="/dash/app2/", external_link=True, style={"fontWeight": "bold"}),
                         dbc.Button("性別", color="warning", className="me-4", href="/dash/app3/", external_link=True, style={"fontWeight": "bold"}),
-                        dbc.Button("年收入", color="danger", className="me-4", href="/dash/app4/", external_link=True, style={"fontWeight": "bold"}),
+                        dbc.Button("年收入", color="primary", className="me-4", href="/dash/app4/", external_link=True, style={"fontWeight": "bold"}),
                     ],
                     className="d-flex justify-content-center",
                     style={"paddingTop": "2.5rem"},
