@@ -19,7 +19,7 @@ dash_ML.layout = html.Div(
                 html.Div(
                     [html.Div([html.H1("信用卡消費樣態")], className="col text-center")],
                     className="row",
-                    style={"padding": "3rem 0 1rem 0"},
+                    style={"paddingTop": "3rem"},
                 ),
                  html.Div(
                     [
@@ -90,15 +90,16 @@ dash_ML.layout = html.Div(
                     style={"paddingTop": "2rem"},
                 ),
                 html.Div([
-                    dcc.Graph(id="graph_line"),
-                    dcc.Graph(id="graph_age"),
-                    dcc.Graph(id="graph_ar"),
-                    dcc.Graph(id="graph_line_age"),
-                ]),
-            ]
+                    dcc.Graph(id="graph_line", style={'flex': '3'}),
+                    dcc.Graph(id="graph_age", style={'flex': '3'}),
+                    dcc.Graph(id="graph_ar", style={'flex': '3'}),
+                    dcc.Graph(id="graph_line_age", style={'flex': '3'}),
+                ],style={'display': 'flex', 'flexWrap': 'wrap'}),
+            ],
+            style={"maxWidth":"100%","height":"auto"}
         )
     ],
-    className="container-lg",
+    
 )
 
 @dash_ML.callback(
@@ -140,12 +141,11 @@ def line_chart(selected_ind):
 
         # Set color to blue for the selected industry
         highlighted_ind = selected_ind
-        color = 'blue' if selected_ind == highlighted_ind else 'rgba(1, 87, 155, 0.2)'
         print(highlighted_ind)
 
         fig = make_subplots(specs=[[{"secondary_y": True}]])
         fig.add_trace(
-            go.Bar(x=agg_df['產業別'], y=agg_df['信用卡交易金額[新台幣]'], name="信用卡交易金額[新台幣]", marker_color=color),
+            go.Bar(x=agg_df['產業別'], y=agg_df['信用卡交易金額[新台幣]'], name="信用卡交易金額[新台幣]", marker_color=['rgba(1,87,155,0.2)' if ind != highlighted_ind else 'blue' for ind in agg_df['產業別']]),
             secondary_y=False,
         )
         fig.add_trace(
@@ -164,82 +164,149 @@ def line_chart(selected_ind):
 
 @dash_ML.callback(
     Output("graph_age", "figure"),
-    [Input("graph_age", "id")]
+    Input("age", "value")
 )
-def line_chart(graph_id):
+def line_chart(selected_age):
     global df
-    df['平均交易金額'] = df['信用卡交易金額[新台幣]'] / df['信用卡交易筆數']
+    if selected_age == "ALL":
+        df['平均交易金額'] = df['信用卡交易金額[新台幣]'] / df['信用卡交易筆數']
 
-    agg_df = df.groupby('年齡層').agg({
-        '信用卡交易金額[新台幣]': 'sum',
-        '信用卡交易筆數': 'sum',
-        '平均交易金額': 'mean'
-    }).reset_index()
+        agg_df = df.groupby('年齡層').agg({
+            '信用卡交易金額[新台幣]': 'sum',
+            '信用卡交易筆數': 'sum',
+            '平均交易金額': 'mean'
+        }).reset_index()
 
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
 
-    fig.add_trace(
-        go.Bar(x=agg_df['年齡層'], y=agg_df['信用卡交易金額[新台幣]'], name="信用卡交易金額[新台幣]"),
-        secondary_y=False,
-    )
+        fig.add_trace(
+            go.Bar(x=agg_df['年齡層'], y=agg_df['信用卡交易金額[新台幣]'], name="信用卡交易金額[新台幣]"),
+            secondary_y=False,
+        )
 
-    fig.add_trace(
-        go.Scatter(x=agg_df['年齡層'], y=agg_df['平均交易金額'], name="平均交易金額", mode='lines+markers', marker=dict(color='red')),
-        secondary_y=True,
-    )
+        fig.add_trace(
+            go.Scatter(x=agg_df['年齡層'], y=agg_df['平均交易金額'], name="平均交易金額", mode='lines+markers', marker=dict(color='red')),
+            secondary_y=True,
+        )
 
-    fig.update_layout(
-        title_text="不同年齡層的信用卡交易金額及平均交易金額"
-    )
+        fig.update_layout(
+            title_text="不同年齡層的信用卡交易金額及平均交易金額"
+        )
 
-    fig.update_xaxes(title_text="年齡層")
+        fig.update_xaxes(title_text="年齡層")
 
-    fig.update_yaxes(title_text="信用卡交易金額[新台幣]", secondary_y=False)
-    fig.update_yaxes(title_text="平均交易金額", secondary_y=True)
+        fig.update_yaxes(title_text="信用卡交易金額[新台幣]", secondary_y=False)
+        fig.update_yaxes(title_text="平均交易金額", secondary_y=True)
+    else:
+        df['平均交易金額'] = df['信用卡交易金額[新台幣]'] / df['信用卡交易筆數']
+
+        agg_df = df.groupby('年齡層').agg({
+            '信用卡交易金額[新台幣]': 'sum',
+            '信用卡交易筆數': 'sum',
+            '平均交易金額': 'mean'
+        }).reset_index()
+
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+        highlighted_age = selected_age
+
+        fig.add_trace(
+            go.Bar(x=agg_df['年齡層'], y=agg_df['信用卡交易金額[新台幣]'], name="信用卡交易金額[新台幣]", marker_color=['rgba(1,87,155,0.2)' if age != highlighted_age else 'blue' for age in agg_df['年齡層']]),
+            secondary_y=False,
+        )
+
+        fig.add_trace(
+            go.Scatter(x=agg_df['年齡層'], y=agg_df['平均交易金額'], name="平均交易金額", mode='lines+markers', marker=dict(color='red')),
+            secondary_y=True,
+        )
+
+        fig.update_layout(
+            title_text="不同年齡層的信用卡交易金額及平均交易金額"
+        )
+
+        fig.update_xaxes(title_text="年齡層")
+
+        fig.update_yaxes(title_text="信用卡交易金額[新台幣]", secondary_y=False)
+        fig.update_yaxes(title_text="平均交易金額", secondary_y=True)
     return fig
 
 @dash_ML.callback(
     Output("graph_ar", "figure"),
-    [Input("graph_ar", "id")]
+    Input("area", "value")
 )
-def line_chart(graph_id):
+def line_chart(selected_ar):
     global df
-    df['平均交易金額'] = df['信用卡交易金額[新台幣]'] / df['信用卡交易筆數']
+    if selected_ar == "ALL":
+        df['平均交易金額'] = df['信用卡交易金額[新台幣]'] / df['信用卡交易筆數']
 
-    agg_df = df.groupby('地區').agg({
-        '信用卡交易金額[新台幣]': 'sum',
-        '信用卡交易筆數': 'sum',
-        '平均交易金額': 'mean'
-    }).reset_index()
+        agg_df = df.groupby('地區').agg({
+            '信用卡交易金額[新台幣]': 'sum',
+            '信用卡交易筆數': 'sum',
+            '平均交易金額': 'mean'
+        }).reset_index()
 
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
 
-    fig.add_trace(
-        go.Bar(x=agg_df['地區'], y=agg_df['信用卡交易金額[新台幣]'], name="信用卡交易金額[新台幣]"),
-        secondary_y=False,
-    )
+        fig.add_trace(
+            go.Bar(x=agg_df['地區'], y=agg_df['信用卡交易金額[新台幣]'], name="信用卡交易金額[新台幣]"),
+            secondary_y=False,
+        )
 
-    fig.add_trace(
-        go.Scatter(x=agg_df['地區'], y=agg_df['平均交易金額'], name="平均交易金額", mode='lines+markers', marker=dict(color='red')),
-        secondary_y=True,
-    )
+        fig.add_trace(
+            go.Scatter(x=agg_df['地區'], y=agg_df['平均交易金額'], name="平均交易金額", mode='lines+markers', marker=dict(color='red')),
+            secondary_y=True,
+        )
 
-    fig.update_layout(
-        title_text="不同地區的信用卡交易金額及平均交易金額"
-    )
+        fig.update_layout(
+            title_text="不同地區的信用卡交易金額及平均交易金額"
+        )
 
-    fig.update_xaxes(title_text="地區")
+        fig.update_xaxes(title_text="地區")
 
-    fig.update_yaxes(title_text="信用卡交易金額[新台幣]", secondary_y=False)
-    fig.update_yaxes(title_text="平均交易金額", secondary_y=True)
+        fig.update_yaxes(title_text="信用卡交易金額[新台幣]", secondary_y=False)
+        fig.update_yaxes(title_text="平均交易金額", secondary_y=True)
+    else:
+        df['平均交易金額'] = df['信用卡交易金額[新台幣]'] / df['信用卡交易筆數']
+
+        agg_df = df.groupby('地區').agg({
+            '信用卡交易金額[新台幣]': 'sum',
+            '信用卡交易筆數': 'sum',
+            '平均交易金額': 'mean'
+        }).reset_index()
+
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+        highlighted_ar = selected_ar
+
+        fig.add_trace(
+            go.Bar(x=agg_df['地區'], y=agg_df['信用卡交易金額[新台幣]'], name="信用卡交易金額[新台幣]", marker_color=['rgba(1,87,155,0.2)' if ar != highlighted_ar else 'blue' for ar in agg_df['地區']]),
+            secondary_y=False,
+        )
+
+        fig.add_trace(
+            go.Scatter(x=agg_df['地區'], y=agg_df['平均交易金額'], name="平均交易金額", mode='lines+markers', marker=dict(color='red')),
+            secondary_y=True,
+        )
+
+        fig.update_layout(
+            title_text="不同地區的信用卡交易金額及平均交易金額"
+        )
+
+        fig.update_xaxes(title_text="地區")
+
+        fig.update_yaxes(title_text="信用卡交易金額[新台幣]", secondary_y=False)
+        fig.update_yaxes(title_text="平均交易金額", secondary_y=True)
     return fig
 
 @dash_ML.callback(
     Output("graph_line_age", "figure"),
-    [Input("graph_line_age", "id")]
+    Input("age", "value")
 )
-def line_chart(graph_id):
+def line_chart(selected_ar):
     global df
-    monthly_total = df.groupby(['年', '年齡層'])['信用卡交易金額[新台幣]'].sum().reset_index()
-    fig = px.line(monthly_total, x="年", y="信用卡交易金額[新台幣]", color="年齡層", title='各年齡層每月信用卡交易金額趨勢', markers=True)
+    if selected_ar == "ALL":
+        year_total = df.groupby(['年', '年齡層'])['信用卡交易金額[新台幣]'].sum().reset_index()
+        fig = px.line(year_total, x="年", y="信用卡交易金額[新台幣]", color="年齡層", title='各年齡層每年信用卡交易金額趨勢', markers=True)
+    else:
+        year_total = df.groupby(['年', '年齡層'])['信用卡交易金額[新台幣]'].sum().reset_index()
+        filtered_df = year_total[year_total['年齡層'] == f'{selected_ar}']
+        fig = px.line(filtered_df, x="年", y="信用卡交易金額[新台幣]", color="年齡層", title=f'{selected_ar}每年信用卡交易金額趨勢', markers=True)
     return fig
