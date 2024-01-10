@@ -65,6 +65,7 @@ dash2.layout = html.Div(
                                         {"label": "7月", "value": "7"},
                                         {"label": "8月", "value": "8"},
                                         {"label": "9月", "value": "9"},
+                                        {"label": "10月", "value": "10"},
                                         {"label": "ALL", "value": "ALL"},
                                     ],
                                     style={"marginRight": "1rem"},
