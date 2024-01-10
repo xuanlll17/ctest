@@ -19,13 +19,12 @@ application = DispatcherMiddleware(
      "/dash/app3": dash3.server,
      "/dash/app4": dash4.server,
      "/dash/index": dash_index.server,
-     "/dash/ML": dash_ML.server
     },
 )
 
 @app.route("/")
 def index():
-    return redirect('/dash/ML')
+    return redirect('/dash/index')
 
 if __name__ == "__main__":
     run_simple("localhost", 8080, application,use_debugger=True,use_reloader=True)
