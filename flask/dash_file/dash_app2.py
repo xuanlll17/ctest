@@ -21,7 +21,12 @@ dash2.layout = html.Div(
         dbc.Container(
             [
                 html.Div(
-                    [html.Div([html.H1("各職業類別信用卡消費樣態")], className="col text-center")],
+                    [
+                        html.Div(
+                            [html.H1("各職業類別信用卡消費樣態")],
+                            className="col text-center",
+                        )
+                    ],
                     className="row",
                     style={"paddingTop": "2rem"},
                 ),
@@ -31,7 +36,7 @@ dash2.layout = html.Div(
                             label="資料類別",
                             children=[
                                 dbc.DropdownMenuItem(
-                                    "首頁", href="/dash/index/",external_link=True
+                                    "首頁", href="/dash/index/", external_link=True
                                 ),
                                 dbc.DropdownMenuItem(
                                     "教育程度", href="/dash/app/", external_link=True
@@ -66,6 +71,8 @@ dash2.layout = html.Div(
                                         {"label": "8月", "value": "8"},
                                         {"label": "9月", "value": "9"},
                                         {"label": "10月", "value": "10"},
+                                        {"label": "10月", "value": "11"},
+                                        {"label": "10月", "value": "12"},
                                         {"label": "ALL", "value": "ALL"},
                                     ],
                                     style={"marginRight": "1rem"},
@@ -119,16 +126,24 @@ dash2.layout = html.Div(
                                     options=[
                                         {"label": "軍警人員一", "value": "軍警人員一"},
                                         {"label": "軍警人員二", "value": "軍警人員二"},
-                                        {"label": "其他公共行政類", "value": "其他公共行政類"},
+                                        {
+                                            "label": "其他公共行政類",
+                                            "value": "其他公共行政類",
+                                        },
                                         {"label": "教育類", "value": "教育類"},
-                                        {"label": "工商及服務類", "value": "工商及服務類"},
-                                        {"label": "專業及技術服務類", "value": "專業及技術服務類"},
+                                        {
+                                            "label": "工商及服務類",
+                                            "value": "工商及服務類",
+                                        },
+                                        {
+                                            "label": "專業及技術服務類",
+                                            "value": "專業及技術服務類",
+                                        },
                                         {"label": "ALL", "value": "ALL"},
                                     ],
                                 ),
                             ],
-                          
-                        )
+                        ),
                     ],
                     className="d-flex justify-content-center",
                     style={"paddingTop": "2rem"},
@@ -161,12 +176,19 @@ dash2.layout = html.Div(
                     className="row",
                     style={"paddingTop": "2rem"},
                 ),
-                html.Div([
-                    html.Div(
-                        [
-                            dcc.Graph(id="graph", style={'flex': '5'}),
-                            dcc.Graph(id="graph_sunburst", style={'flex': '5'}),
-                        ], style={'display': 'flex', 'flexWrap': 'wrap', "paddingTop": "2rem"}),
+                html.Div(
+                    [
+                        html.Div(
+                            [
+                                dcc.Graph(id="graph", style={"flex": "5"}),
+                                dcc.Graph(id="graph_sunburst", style={"flex": "5"}),
+                            ],
+                            style={
+                                "display": "flex",
+                                "flexWrap": "wrap",
+                                "paddingTop": "2rem",
+                            },
+                        ),
                         dcc.Graph(id="graph_line"),
                         dcc.Graph(id="graph_bar"),
                     ],
@@ -236,7 +258,7 @@ def update_pie_chart(selected_value, selected_job_value):
             filtered_df = lastest_df[lastest_df['產業別'] == f'{selected_value}']
             fig = px.pie(filtered_df, values='信用卡交易金額', names='職業類別', title=f'{selected_value} / 各職業類別信用卡交易金額分布', height=500)
     return fig
-    
+
 @dash2.callback(
     Output("graph_line", "figure"),
     Input("job","value")

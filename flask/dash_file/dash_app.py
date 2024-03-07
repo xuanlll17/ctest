@@ -21,7 +21,12 @@ dash.layout = html.Div(
         dbc.Container(
             [
                 html.Div(
-                    [html.Div([html.H1("各教育程度信用卡消費樣態")], className="col text-center")],
+                    [
+                        html.Div(
+                            [html.H1("各教育程度信用卡消費樣態")],
+                            className="col text-center",
+                        )
+                    ],
                     className="row",
                     style={"paddingTop": "2rem"},
                 ),
@@ -31,9 +36,8 @@ dash.layout = html.Div(
                             label="資料類別",
                             children=[
                                 dbc.DropdownMenuItem(
-                                    "首頁", href="/dash/index/",external_link=True
+                                    "首頁", href="/dash/index/", external_link=True
                                 ),
-                                
                                 dbc.DropdownMenuItem(
                                     "年齡層", href="/dash/app1/", external_link=True
                                 ),
@@ -45,7 +49,7 @@ dash.layout = html.Div(
                                 ),
                                 dbc.DropdownMenuItem(
                                     "年收入", href="/dash/app4/", external_link=True
-                                ),      
+                                ),
                             ],
                             style={"marginRight": "1rem"},
                         ),
@@ -66,6 +70,8 @@ dash.layout = html.Div(
                                         {"label": "8月", "value": "8"},
                                         {"label": "9月", "value": "9"},
                                         {"label": "10月", "value": "10"},
+                                        {"label": "10月", "value": "11"},
+                                        {"label": "10月", "value": "12"},
                                         {"label": "ALL", "value": "ALL"},
                                     ],
                                     style={"marginRight": "1rem"},
@@ -109,7 +115,6 @@ dash.layout = html.Div(
                                     style={"marginRight": "1rem"},
                                 ),
                             ],
-       
                         ),
                         dbc.InputGroup(
                             [
@@ -127,11 +132,12 @@ dash.layout = html.Div(
                                     ],
                                 ),
                             ],
-                          
-                        )
+                        ),
                     ],
                     className="d-flex justify-content-center",
-                    style={"paddingTop": "2rem",},
+                    style={
+                        "paddingTop": "2rem",
+                    },
                 ),
                 html.Div(
                     [
@@ -161,15 +167,19 @@ dash.layout = html.Div(
                     className="row",
                     style={"paddingTop": "2rem"},
                 ),
-                html.Div([
-                    html.Div(
-                        [
-                            dcc.Graph(id="graph", style={'flex': '5'}),
-                            dcc.Graph(id="graph_sunburst", style={'flex': '5'}),
-                        ],style={'display': 'flex', 'flexWrap': 'wrap'}),
+                html.Div(
+                    [
+                        html.Div(
+                            [
+                                dcc.Graph(id="graph", style={"flex": "5"}),
+                                dcc.Graph(id="graph_sunburst", style={"flex": "5"}),
+                            ],
+                            style={"display": "flex", "flexWrap": "wrap"},
+                        ),
                         dcc.Graph(id="graph_line"),
                         dcc.Graph(id="graph_bar"),
-                ]),
+                    ]
+                ),
                 html.Div(
                     [
                         html.Div(
@@ -235,7 +245,7 @@ def update_pie_chart(selected_value, selected_edu_value):
             filtered_df = lastest_df[lastest_df['產業別'] == f'{selected_value}']
             fig = px.pie(filtered_df, values='信用卡交易金額', names='教育程度', title=f'{selected_value} / 各教育程度信用卡交易金額分布', height=500)
     return fig
-    
+
 @dash.callback(
     Output("graph_line", "figure"),
     Input("edu","value")
@@ -294,5 +304,3 @@ def update_sunburst_chart(selected_mon,selected_ar,selected_ind):
         filtered_df = lastest_df[(lastest_df['月'].astype(str) == selected_mon) & (lastest_df['地區'] == selected_ar) & (lastest_df['產業別'] == selected_ind)]
         fig = px.sunburst(filtered_df, path=['地區', '產業別', '教育程度'], values='信用卡交易金額',title=f'{selected_mon}月 / {selected_ar} / {selected_ind} / 各教育程度信用卡交易分布', height=500)
     return fig
-
-
