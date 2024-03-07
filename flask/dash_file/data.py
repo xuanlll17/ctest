@@ -350,11 +350,11 @@ def incom_data() -> list[tuple]:
     return rows'''
 
 
-#def main():
-    #__download_creditcard_data()
-    #trans_data()
-    #update_render_data()
+def main():
+    __download_creditcard_data()
+    trans_data()
+    update_render_data()
 
 
-#if __name__ == "__main__":
-    #main()
+if __name__ == "__main__":
+    main()
